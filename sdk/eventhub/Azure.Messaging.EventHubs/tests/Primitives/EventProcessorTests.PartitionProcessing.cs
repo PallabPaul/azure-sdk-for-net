@@ -130,7 +130,12 @@ namespace Azure.Messaging.EventHubs.Tests
             using var cancellationSource = new CancellationTokenSource();
             cancellationSource.CancelAfter(EventHubsTestEnvironment.Instance.TestExecutionTimeLimit);
 
-            var eventBatch = new[] { new EventData(new BinaryData(Array.Empty<byte>())), new EventData(new BinaryData(Array.Empty<byte>())) };
+            var eventBatch = new[]
+            {
+                EventHubsModelFactory.EventData(new BinaryData(Array.Empty<byte>()), sequenceNumber: 12345),
+                EventHubsModelFactory.EventData(new BinaryData(Array.Empty<byte>()), sequenceNumber: 67890),
+            };
+
             var partition = new EventProcessorPartition { PartitionId = "123" };
             var mockLogger = new Mock<EventHubsEventSource>();
             var mockProcessor = new Mock<EventProcessor<EventProcessorPartition>>(67, "consumerGroup", "namespace", "eventHub", Mock.Of<TokenCredential>(), default(EventProcessorOptions)) { CallBase = true };
@@ -145,7 +150,9 @@ namespace Azure.Messaging.EventHubs.Tests
                     mockProcessor.Object.EventHubName,
                     mockProcessor.Object.ConsumerGroup,
                     It.IsAny<string>(),
-                    eventBatch.Length),
+                    eventBatch.Length,
+                    eventBatch.First().SequenceNumber.ToString(),
+                    eventBatch.Last().SequenceNumber.ToString()),
                 Times.Once);
 
             mockLogger
@@ -1636,7 +1643,7 @@ namespace Azure.Messaging.EventHubs.Tests
             var mockProcessor = new Mock<EventProcessor<EventProcessorPartition>>(5, "consumerGroup", "namespace", "eventHub", Mock.Of<TokenCredential>(), new EventProcessorOptions()) { CallBase = true };
 
             mockLogger
-                .Setup(log => log.EventProcessorPartitionProcessingEventPositionDetermined(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .Setup(log => log.EventProcessorPartitionProcessingEventPositionDetermined(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), false, null, null))
                 .Callback(() => completionSource.TrySetResult(true));
 
             mockConsumer
@@ -1665,7 +1672,9 @@ namespace Azure.Messaging.EventHubs.Tests
                     mockProcessor.Object.EventHubName,
                     mockProcessor.Object.ConsumerGroup,
                     expectedEventPosition.ToString(),
-                    false),
+                    false,
+                    null, // no checkpoint was used
+                    null), // no checkpoint was used
                 Times.Once);
 
             cancellationSource.Cancel();

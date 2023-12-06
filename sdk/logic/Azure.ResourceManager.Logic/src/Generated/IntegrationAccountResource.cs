@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -21,13 +22,16 @@ namespace Azure.ResourceManager.Logic
 {
     /// <summary>
     /// A Class representing an IntegrationAccount along with the instance operations that can be performed on it.
-    /// If you have a <see cref="ResourceIdentifier" /> you can construct an <see cref="IntegrationAccountResource" />
-    /// from an instance of <see cref="ArmClient" /> using the GetIntegrationAccountResource method.
-    /// Otherwise you can get one from its parent resource <see cref="ResourceGroupResource" /> using the GetIntegrationAccount method.
+    /// If you have a <see cref="ResourceIdentifier"/> you can construct an <see cref="IntegrationAccountResource"/>
+    /// from an instance of <see cref="ArmClient"/> using the GetIntegrationAccountResource method.
+    /// Otherwise you can get one from its parent resource <see cref="ResourceGroupResource"/> using the GetIntegrationAccount method.
     /// </summary>
     public partial class IntegrationAccountResource : ArmResource
     {
         /// <summary> Generate the resource identifier of a <see cref="IntegrationAccountResource"/> instance. </summary>
+        /// <param name="subscriptionId"> The subscriptionId. </param>
+        /// <param name="resourceGroupName"> The resourceGroupName. </param>
+        /// <param name="integrationAccountName"> The integrationAccountName. </param>
         public static ResourceIdentifier CreateResourceIdentifier(string subscriptionId, string resourceGroupName, string integrationAccountName)
         {
             var resourceId = $"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Logic/integrationAccounts/{integrationAccountName}";
@@ -38,12 +42,15 @@ namespace Azure.ResourceManager.Logic
         private readonly IntegrationAccountsRestOperations _integrationAccountRestClient;
         private readonly IntegrationAccountData _data;
 
+        /// <summary> Gets the resource type for the operations. </summary>
+        public static readonly ResourceType ResourceType = "Microsoft.Logic/integrationAccounts";
+
         /// <summary> Initializes a new instance of the <see cref="IntegrationAccountResource"/> class for mocking. </summary>
         protected IntegrationAccountResource()
         {
         }
 
-        /// <summary> Initializes a new instance of the <see cref = "IntegrationAccountResource"/> class. </summary>
+        /// <summary> Initializes a new instance of the <see cref="IntegrationAccountResource"/> class. </summary>
         /// <param name="client"> The client parameters to use in these operations. </param>
         /// <param name="data"> The resource that is the target of operations. </param>
         internal IntegrationAccountResource(ArmClient client, IntegrationAccountData data) : this(client, data.Id)
@@ -64,9 +71,6 @@ namespace Azure.ResourceManager.Logic
 			ValidateResourceId(Id);
 #endif
         }
-
-        /// <summary> Gets the resource type for the operations. </summary>
-        public static readonly ResourceType ResourceType = "Microsoft.Logic/integrationAccounts";
 
         /// <summary> Gets whether or not the current instance has data. </summary>
         public virtual bool HasData { get; }
@@ -93,7 +97,7 @@ namespace Azure.ResourceManager.Logic
         /// <returns> An object representing collection of IntegrationAccountAssemblyDefinitionResources and their operations over a IntegrationAccountAssemblyDefinitionResource. </returns>
         public virtual IntegrationAccountAssemblyDefinitionCollection GetIntegrationAccountAssemblyDefinitions()
         {
-            return GetCachedClient(Client => new IntegrationAccountAssemblyDefinitionCollection(Client, Id));
+            return GetCachedClient(client => new IntegrationAccountAssemblyDefinitionCollection(client, Id));
         }
 
         /// <summary>
@@ -111,8 +115,8 @@ namespace Azure.ResourceManager.Logic
         /// </summary>
         /// <param name="assemblyArtifactName"> The assembly artifact name. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="assemblyArtifactName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="assemblyArtifactName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="assemblyArtifactName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<IntegrationAccountAssemblyDefinitionResource>> GetIntegrationAccountAssemblyDefinitionAsync(string assemblyArtifactName, CancellationToken cancellationToken = default)
         {
@@ -134,8 +138,8 @@ namespace Azure.ResourceManager.Logic
         /// </summary>
         /// <param name="assemblyArtifactName"> The assembly artifact name. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="assemblyArtifactName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="assemblyArtifactName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="assemblyArtifactName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<IntegrationAccountAssemblyDefinitionResource> GetIntegrationAccountAssemblyDefinition(string assemblyArtifactName, CancellationToken cancellationToken = default)
         {
@@ -146,7 +150,7 @@ namespace Azure.ResourceManager.Logic
         /// <returns> An object representing collection of IntegrationAccountBatchConfigurationResources and their operations over a IntegrationAccountBatchConfigurationResource. </returns>
         public virtual IntegrationAccountBatchConfigurationCollection GetIntegrationAccountBatchConfigurations()
         {
-            return GetCachedClient(Client => new IntegrationAccountBatchConfigurationCollection(Client, Id));
+            return GetCachedClient(client => new IntegrationAccountBatchConfigurationCollection(client, Id));
         }
 
         /// <summary>
@@ -164,8 +168,8 @@ namespace Azure.ResourceManager.Logic
         /// </summary>
         /// <param name="batchConfigurationName"> The batch configuration name. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="batchConfigurationName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="batchConfigurationName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="batchConfigurationName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<IntegrationAccountBatchConfigurationResource>> GetIntegrationAccountBatchConfigurationAsync(string batchConfigurationName, CancellationToken cancellationToken = default)
         {
@@ -187,8 +191,8 @@ namespace Azure.ResourceManager.Logic
         /// </summary>
         /// <param name="batchConfigurationName"> The batch configuration name. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="batchConfigurationName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="batchConfigurationName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="batchConfigurationName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<IntegrationAccountBatchConfigurationResource> GetIntegrationAccountBatchConfiguration(string batchConfigurationName, CancellationToken cancellationToken = default)
         {
@@ -199,7 +203,7 @@ namespace Azure.ResourceManager.Logic
         /// <returns> An object representing collection of IntegrationAccountSchemaResources and their operations over a IntegrationAccountSchemaResource. </returns>
         public virtual IntegrationAccountSchemaCollection GetIntegrationAccountSchemas()
         {
-            return GetCachedClient(Client => new IntegrationAccountSchemaCollection(Client, Id));
+            return GetCachedClient(client => new IntegrationAccountSchemaCollection(client, Id));
         }
 
         /// <summary>
@@ -217,8 +221,8 @@ namespace Azure.ResourceManager.Logic
         /// </summary>
         /// <param name="schemaName"> The integration account schema name. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="schemaName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="schemaName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="schemaName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<IntegrationAccountSchemaResource>> GetIntegrationAccountSchemaAsync(string schemaName, CancellationToken cancellationToken = default)
         {
@@ -240,8 +244,8 @@ namespace Azure.ResourceManager.Logic
         /// </summary>
         /// <param name="schemaName"> The integration account schema name. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="schemaName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="schemaName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="schemaName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<IntegrationAccountSchemaResource> GetIntegrationAccountSchema(string schemaName, CancellationToken cancellationToken = default)
         {
@@ -252,7 +256,7 @@ namespace Azure.ResourceManager.Logic
         /// <returns> An object representing collection of IntegrationAccountMapResources and their operations over a IntegrationAccountMapResource. </returns>
         public virtual IntegrationAccountMapCollection GetIntegrationAccountMaps()
         {
-            return GetCachedClient(Client => new IntegrationAccountMapCollection(Client, Id));
+            return GetCachedClient(client => new IntegrationAccountMapCollection(client, Id));
         }
 
         /// <summary>
@@ -270,8 +274,8 @@ namespace Azure.ResourceManager.Logic
         /// </summary>
         /// <param name="mapName"> The integration account map name. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="mapName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="mapName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="mapName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<IntegrationAccountMapResource>> GetIntegrationAccountMapAsync(string mapName, CancellationToken cancellationToken = default)
         {
@@ -293,8 +297,8 @@ namespace Azure.ResourceManager.Logic
         /// </summary>
         /// <param name="mapName"> The integration account map name. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="mapName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="mapName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="mapName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<IntegrationAccountMapResource> GetIntegrationAccountMap(string mapName, CancellationToken cancellationToken = default)
         {
@@ -305,7 +309,7 @@ namespace Azure.ResourceManager.Logic
         /// <returns> An object representing collection of IntegrationAccountPartnerResources and their operations over a IntegrationAccountPartnerResource. </returns>
         public virtual IntegrationAccountPartnerCollection GetIntegrationAccountPartners()
         {
-            return GetCachedClient(Client => new IntegrationAccountPartnerCollection(Client, Id));
+            return GetCachedClient(client => new IntegrationAccountPartnerCollection(client, Id));
         }
 
         /// <summary>
@@ -323,8 +327,8 @@ namespace Azure.ResourceManager.Logic
         /// </summary>
         /// <param name="partnerName"> The integration account partner name. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="partnerName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="partnerName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="partnerName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<IntegrationAccountPartnerResource>> GetIntegrationAccountPartnerAsync(string partnerName, CancellationToken cancellationToken = default)
         {
@@ -346,8 +350,8 @@ namespace Azure.ResourceManager.Logic
         /// </summary>
         /// <param name="partnerName"> The integration account partner name. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="partnerName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="partnerName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="partnerName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<IntegrationAccountPartnerResource> GetIntegrationAccountPartner(string partnerName, CancellationToken cancellationToken = default)
         {
@@ -358,7 +362,7 @@ namespace Azure.ResourceManager.Logic
         /// <returns> An object representing collection of IntegrationAccountAgreementResources and their operations over a IntegrationAccountAgreementResource. </returns>
         public virtual IntegrationAccountAgreementCollection GetIntegrationAccountAgreements()
         {
-            return GetCachedClient(Client => new IntegrationAccountAgreementCollection(Client, Id));
+            return GetCachedClient(client => new IntegrationAccountAgreementCollection(client, Id));
         }
 
         /// <summary>
@@ -376,8 +380,8 @@ namespace Azure.ResourceManager.Logic
         /// </summary>
         /// <param name="agreementName"> The integration account agreement name. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="agreementName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="agreementName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="agreementName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<IntegrationAccountAgreementResource>> GetIntegrationAccountAgreementAsync(string agreementName, CancellationToken cancellationToken = default)
         {
@@ -399,8 +403,8 @@ namespace Azure.ResourceManager.Logic
         /// </summary>
         /// <param name="agreementName"> The integration account agreement name. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="agreementName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="agreementName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="agreementName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<IntegrationAccountAgreementResource> GetIntegrationAccountAgreement(string agreementName, CancellationToken cancellationToken = default)
         {
@@ -411,7 +415,7 @@ namespace Azure.ResourceManager.Logic
         /// <returns> An object representing collection of IntegrationAccountCertificateResources and their operations over a IntegrationAccountCertificateResource. </returns>
         public virtual IntegrationAccountCertificateCollection GetIntegrationAccountCertificates()
         {
-            return GetCachedClient(Client => new IntegrationAccountCertificateCollection(Client, Id));
+            return GetCachedClient(client => new IntegrationAccountCertificateCollection(client, Id));
         }
 
         /// <summary>
@@ -429,8 +433,8 @@ namespace Azure.ResourceManager.Logic
         /// </summary>
         /// <param name="certificateName"> The integration account certificate name. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="certificateName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="certificateName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="certificateName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<IntegrationAccountCertificateResource>> GetIntegrationAccountCertificateAsync(string certificateName, CancellationToken cancellationToken = default)
         {
@@ -452,8 +456,8 @@ namespace Azure.ResourceManager.Logic
         /// </summary>
         /// <param name="certificateName"> The integration account certificate name. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="certificateName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="certificateName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="certificateName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<IntegrationAccountCertificateResource> GetIntegrationAccountCertificate(string certificateName, CancellationToken cancellationToken = default)
         {
@@ -464,7 +468,7 @@ namespace Azure.ResourceManager.Logic
         /// <returns> An object representing collection of IntegrationAccountSessionResources and their operations over a IntegrationAccountSessionResource. </returns>
         public virtual IntegrationAccountSessionCollection GetIntegrationAccountSessions()
         {
-            return GetCachedClient(Client => new IntegrationAccountSessionCollection(Client, Id));
+            return GetCachedClient(client => new IntegrationAccountSessionCollection(client, Id));
         }
 
         /// <summary>
@@ -482,8 +486,8 @@ namespace Azure.ResourceManager.Logic
         /// </summary>
         /// <param name="sessionName"> The integration account session name. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="sessionName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="sessionName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="sessionName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<IntegrationAccountSessionResource>> GetIntegrationAccountSessionAsync(string sessionName, CancellationToken cancellationToken = default)
         {
@@ -505,8 +509,8 @@ namespace Azure.ResourceManager.Logic
         /// </summary>
         /// <param name="sessionName"> The integration account session name. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="sessionName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="sessionName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="sessionName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<IntegrationAccountSessionResource> GetIntegrationAccountSession(string sessionName, CancellationToken cancellationToken = default)
         {
@@ -797,13 +801,13 @@ namespace Azure.ResourceManager.Logic
         /// <param name="content"> The key vault parameters. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="content"/> is null. </exception>
-        /// <returns> An async collection of <see cref="IntegrationAccountKeyVaultKey" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="IntegrationAccountKeyVaultKey"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<IntegrationAccountKeyVaultKey> GetKeyVaultKeysAsync(IntegrationAccountListKeyVaultKeyContent content, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(content, nameof(content));
 
             HttpMessage FirstPageRequest(int? pageSizeHint) => _integrationAccountRestClient.CreateListKeyVaultKeysRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, content);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, null, IntegrationAccountKeyVaultKey.DeserializeIntegrationAccountKeyVaultKey, _integrationAccountClientDiagnostics, Pipeline, "IntegrationAccountResource.GetKeyVaultKeys", "value", null, cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, null, IntegrationAccountKeyVaultKey.DeserializeIntegrationAccountKeyVaultKey, _integrationAccountClientDiagnostics, Pipeline, "IntegrationAccountResource.GetKeyVaultKeys", "value", null, cancellationToken);
         }
 
         /// <summary>
@@ -822,13 +826,13 @@ namespace Azure.ResourceManager.Logic
         /// <param name="content"> The key vault parameters. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="content"/> is null. </exception>
-        /// <returns> A collection of <see cref="IntegrationAccountKeyVaultKey" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="IntegrationAccountKeyVaultKey"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<IntegrationAccountKeyVaultKey> GetKeyVaultKeys(IntegrationAccountListKeyVaultKeyContent content, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(content, nameof(content));
 
             HttpMessage FirstPageRequest(int? pageSizeHint) => _integrationAccountRestClient.CreateListKeyVaultKeysRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, content);
-            return PageableHelpers.CreatePageable(FirstPageRequest, null, IntegrationAccountKeyVaultKey.DeserializeIntegrationAccountKeyVaultKey, _integrationAccountClientDiagnostics, Pipeline, "IntegrationAccountResource.GetKeyVaultKeys", "value", null, cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, null, IntegrationAccountKeyVaultKey.DeserializeIntegrationAccountKeyVaultKey, _integrationAccountClientDiagnostics, Pipeline, "IntegrationAccountResource.GetKeyVaultKeys", "value", null, cancellationToken);
         }
 
         /// <summary>

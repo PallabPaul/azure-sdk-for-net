@@ -10,12 +10,12 @@ namespace Azure.ResourceManager.AppContainers.Models
     /// <summary> Container App's Job execution name. </summary>
     public partial class ContainerAppJobExecutionBase
     {
-        /// <summary> Initializes a new instance of ContainerAppJobExecutionBase. </summary>
-        public ContainerAppJobExecutionBase()
+        /// <summary> Initializes a new instance of <see cref="ContainerAppJobExecutionBase"/>. </summary>
+        internal ContainerAppJobExecutionBase()
         {
         }
 
-        /// <summary> Initializes a new instance of ContainerAppJobExecutionBase. </summary>
+        /// <summary> Initializes a new instance of <see cref="ContainerAppJobExecutionBase"/>. </summary>
         /// <param name="name"> Job execution name. </param>
         /// <param name="id"> Job execution Id. </param>
         internal ContainerAppJobExecutionBase(string name, string id)
@@ -25,8 +25,8 @@ namespace Azure.ResourceManager.AppContainers.Models
         }
 
         /// <summary> Job execution name. </summary>
-        public string Name { get; set; }
+        public string Name { get; }
         /// <summary> Job execution Id. </summary>
-        public string Id { get; set; }
+        public string Id { get; }
     }
 }

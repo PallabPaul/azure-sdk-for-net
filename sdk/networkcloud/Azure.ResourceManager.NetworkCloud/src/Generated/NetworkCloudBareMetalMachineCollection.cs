@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -20,9 +21,9 @@ using Azure.ResourceManager.Resources;
 namespace Azure.ResourceManager.NetworkCloud
 {
     /// <summary>
-    /// A class representing a collection of <see cref="NetworkCloudBareMetalMachineResource" /> and their operations.
-    /// Each <see cref="NetworkCloudBareMetalMachineResource" /> in the collection will belong to the same instance of <see cref="ResourceGroupResource" />.
-    /// To get a <see cref="NetworkCloudBareMetalMachineCollection" /> instance call the GetNetworkCloudBareMetalMachines method from an instance of <see cref="ResourceGroupResource" />.
+    /// A class representing a collection of <see cref="NetworkCloudBareMetalMachineResource"/> and their operations.
+    /// Each <see cref="NetworkCloudBareMetalMachineResource"/> in the collection will belong to the same instance of <see cref="ResourceGroupResource"/>.
+    /// To get a <see cref="NetworkCloudBareMetalMachineCollection"/> instance call the GetNetworkCloudBareMetalMachines method from an instance of <see cref="ResourceGroupResource"/>.
     /// </summary>
     public partial class NetworkCloudBareMetalMachineCollection : ArmCollection, IEnumerable<NetworkCloudBareMetalMachineResource>, IAsyncEnumerable<NetworkCloudBareMetalMachineResource>
     {
@@ -141,12 +142,12 @@ namespace Azure.ResourceManager.NetworkCloud
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="NetworkCloudBareMetalMachineResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="NetworkCloudBareMetalMachineResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<NetworkCloudBareMetalMachineResource> GetAllAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _networkCloudBareMetalMachineBareMetalMachinesRestClient.CreateListByResourceGroupRequest(Id.SubscriptionId, Id.ResourceGroupName);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _networkCloudBareMetalMachineBareMetalMachinesRestClient.CreateListByResourceGroupNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new NetworkCloudBareMetalMachineResource(Client, NetworkCloudBareMetalMachineData.DeserializeNetworkCloudBareMetalMachineData(e)), _networkCloudBareMetalMachineBareMetalMachinesClientDiagnostics, Pipeline, "NetworkCloudBareMetalMachineCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new NetworkCloudBareMetalMachineResource(Client, NetworkCloudBareMetalMachineData.DeserializeNetworkCloudBareMetalMachineData(e)), _networkCloudBareMetalMachineBareMetalMachinesClientDiagnostics, Pipeline, "NetworkCloudBareMetalMachineCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -163,12 +164,12 @@ namespace Azure.ResourceManager.NetworkCloud
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="NetworkCloudBareMetalMachineResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="NetworkCloudBareMetalMachineResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<NetworkCloudBareMetalMachineResource> GetAll(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _networkCloudBareMetalMachineBareMetalMachinesRestClient.CreateListByResourceGroupRequest(Id.SubscriptionId, Id.ResourceGroupName);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _networkCloudBareMetalMachineBareMetalMachinesRestClient.CreateListByResourceGroupNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName);
-            return PageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new NetworkCloudBareMetalMachineResource(Client, NetworkCloudBareMetalMachineData.DeserializeNetworkCloudBareMetalMachineData(e)), _networkCloudBareMetalMachineBareMetalMachinesClientDiagnostics, Pipeline, "NetworkCloudBareMetalMachineCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new NetworkCloudBareMetalMachineResource(Client, NetworkCloudBareMetalMachineData.DeserializeNetworkCloudBareMetalMachineData(e)), _networkCloudBareMetalMachineBareMetalMachinesClientDiagnostics, Pipeline, "NetworkCloudBareMetalMachineCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -233,6 +234,80 @@ namespace Azure.ResourceManager.NetworkCloud
             {
                 var response = _networkCloudBareMetalMachineBareMetalMachinesRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, bareMetalMachineName, cancellationToken: cancellationToken);
                 return Response.FromValue(response.Value != null, response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetworkCloud/bareMetalMachines/{bareMetalMachineName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>BareMetalMachines_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="bareMetalMachineName"> The name of the bare metal machine. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="bareMetalMachineName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="bareMetalMachineName"/> is null. </exception>
+        public virtual async Task<NullableResponse<NetworkCloudBareMetalMachineResource>> GetIfExistsAsync(string bareMetalMachineName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(bareMetalMachineName, nameof(bareMetalMachineName));
+
+            using var scope = _networkCloudBareMetalMachineBareMetalMachinesClientDiagnostics.CreateScope("NetworkCloudBareMetalMachineCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = await _networkCloudBareMetalMachineBareMetalMachinesRestClient.GetAsync(Id.SubscriptionId, Id.ResourceGroupName, bareMetalMachineName, cancellationToken: cancellationToken).ConfigureAwait(false);
+                if (response.Value == null)
+                    return new NoValueResponse<NetworkCloudBareMetalMachineResource>(response.GetRawResponse());
+                return Response.FromValue(new NetworkCloudBareMetalMachineResource(Client, response.Value), response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetworkCloud/bareMetalMachines/{bareMetalMachineName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>BareMetalMachines_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="bareMetalMachineName"> The name of the bare metal machine. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="bareMetalMachineName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="bareMetalMachineName"/> is null. </exception>
+        public virtual NullableResponse<NetworkCloudBareMetalMachineResource> GetIfExists(string bareMetalMachineName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(bareMetalMachineName, nameof(bareMetalMachineName));
+
+            using var scope = _networkCloudBareMetalMachineBareMetalMachinesClientDiagnostics.CreateScope("NetworkCloudBareMetalMachineCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = _networkCloudBareMetalMachineBareMetalMachinesRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, bareMetalMachineName, cancellationToken: cancellationToken);
+                if (response.Value == null)
+                    return new NoValueResponse<NetworkCloudBareMetalMachineResource>(response.GetRawResponse());
+                return Response.FromValue(new NetworkCloudBareMetalMachineResource(Client, response.Value), response.GetRawResponse());
             }
             catch (Exception e)
             {

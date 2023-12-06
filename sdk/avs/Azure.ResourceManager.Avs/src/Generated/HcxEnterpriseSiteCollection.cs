@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -19,9 +20,9 @@ using Azure.ResourceManager;
 namespace Azure.ResourceManager.Avs
 {
     /// <summary>
-    /// A class representing a collection of <see cref="HcxEnterpriseSiteResource" /> and their operations.
-    /// Each <see cref="HcxEnterpriseSiteResource" /> in the collection will belong to the same instance of <see cref="AvsPrivateCloudResource" />.
-    /// To get a <see cref="HcxEnterpriseSiteCollection" /> instance call the GetHcxEnterpriseSites method from an instance of <see cref="AvsPrivateCloudResource" />.
+    /// A class representing a collection of <see cref="HcxEnterpriseSiteResource"/> and their operations.
+    /// Each <see cref="HcxEnterpriseSiteResource"/> in the collection will belong to the same instance of <see cref="AvsPrivateCloudResource"/>.
+    /// To get a <see cref="HcxEnterpriseSiteCollection"/> instance call the GetHcxEnterpriseSites method from an instance of <see cref="AvsPrivateCloudResource"/>.
     /// </summary>
     public partial class HcxEnterpriseSiteCollection : ArmCollection, IEnumerable<HcxEnterpriseSiteResource>, IAsyncEnumerable<HcxEnterpriseSiteResource>
     {
@@ -222,12 +223,12 @@ namespace Azure.ResourceManager.Avs
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="HcxEnterpriseSiteResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="HcxEnterpriseSiteResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<HcxEnterpriseSiteResource> GetAllAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _hcxEnterpriseSiteRestClient.CreateListRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _hcxEnterpriseSiteRestClient.CreateListNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new HcxEnterpriseSiteResource(Client, HcxEnterpriseSiteData.DeserializeHcxEnterpriseSiteData(e)), _hcxEnterpriseSiteClientDiagnostics, Pipeline, "HcxEnterpriseSiteCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new HcxEnterpriseSiteResource(Client, HcxEnterpriseSiteData.DeserializeHcxEnterpriseSiteData(e)), _hcxEnterpriseSiteClientDiagnostics, Pipeline, "HcxEnterpriseSiteCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -244,12 +245,12 @@ namespace Azure.ResourceManager.Avs
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="HcxEnterpriseSiteResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="HcxEnterpriseSiteResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<HcxEnterpriseSiteResource> GetAll(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _hcxEnterpriseSiteRestClient.CreateListRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _hcxEnterpriseSiteRestClient.CreateListNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new HcxEnterpriseSiteResource(Client, HcxEnterpriseSiteData.DeserializeHcxEnterpriseSiteData(e)), _hcxEnterpriseSiteClientDiagnostics, Pipeline, "HcxEnterpriseSiteCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new HcxEnterpriseSiteResource(Client, HcxEnterpriseSiteData.DeserializeHcxEnterpriseSiteData(e)), _hcxEnterpriseSiteClientDiagnostics, Pipeline, "HcxEnterpriseSiteCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -314,6 +315,80 @@ namespace Azure.ResourceManager.Avs
             {
                 var response = _hcxEnterpriseSiteRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, hcxEnterpriseSiteName, cancellationToken: cancellationToken);
                 return Response.FromValue(response.Value != null, response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/hcxEnterpriseSites/{hcxEnterpriseSiteName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>HcxEnterpriseSites_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="hcxEnterpriseSiteName"> Name of the HCX Enterprise Site in the private cloud. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="hcxEnterpriseSiteName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="hcxEnterpriseSiteName"/> is null. </exception>
+        public virtual async Task<NullableResponse<HcxEnterpriseSiteResource>> GetIfExistsAsync(string hcxEnterpriseSiteName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(hcxEnterpriseSiteName, nameof(hcxEnterpriseSiteName));
+
+            using var scope = _hcxEnterpriseSiteClientDiagnostics.CreateScope("HcxEnterpriseSiteCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = await _hcxEnterpriseSiteRestClient.GetAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, hcxEnterpriseSiteName, cancellationToken: cancellationToken).ConfigureAwait(false);
+                if (response.Value == null)
+                    return new NoValueResponse<HcxEnterpriseSiteResource>(response.GetRawResponse());
+                return Response.FromValue(new HcxEnterpriseSiteResource(Client, response.Value), response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/hcxEnterpriseSites/{hcxEnterpriseSiteName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>HcxEnterpriseSites_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="hcxEnterpriseSiteName"> Name of the HCX Enterprise Site in the private cloud. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="hcxEnterpriseSiteName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="hcxEnterpriseSiteName"/> is null. </exception>
+        public virtual NullableResponse<HcxEnterpriseSiteResource> GetIfExists(string hcxEnterpriseSiteName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(hcxEnterpriseSiteName, nameof(hcxEnterpriseSiteName));
+
+            using var scope = _hcxEnterpriseSiteClientDiagnostics.CreateScope("HcxEnterpriseSiteCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = _hcxEnterpriseSiteRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, hcxEnterpriseSiteName, cancellationToken: cancellationToken);
+                if (response.Value == null)
+                    return new NoValueResponse<HcxEnterpriseSiteResource>(response.GetRawResponse());
+                return Response.FromValue(new HcxEnterpriseSiteResource(Client, response.Value), response.GetRawResponse());
             }
             catch (Exception e)
             {

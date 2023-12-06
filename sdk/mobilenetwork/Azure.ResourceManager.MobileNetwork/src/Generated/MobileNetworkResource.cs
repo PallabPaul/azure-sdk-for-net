@@ -21,13 +21,16 @@ namespace Azure.ResourceManager.MobileNetwork
 {
     /// <summary>
     /// A Class representing a MobileNetwork along with the instance operations that can be performed on it.
-    /// If you have a <see cref="ResourceIdentifier" /> you can construct a <see cref="MobileNetworkResource" />
-    /// from an instance of <see cref="ArmClient" /> using the GetMobileNetworkResource method.
-    /// Otherwise you can get one from its parent resource <see cref="ResourceGroupResource" /> using the GetMobileNetwork method.
+    /// If you have a <see cref="ResourceIdentifier"/> you can construct a <see cref="MobileNetworkResource"/>
+    /// from an instance of <see cref="ArmClient"/> using the GetMobileNetworkResource method.
+    /// Otherwise you can get one from its parent resource <see cref="ResourceGroupResource"/> using the GetMobileNetwork method.
     /// </summary>
     public partial class MobileNetworkResource : ArmResource
     {
         /// <summary> Generate the resource identifier of a <see cref="MobileNetworkResource"/> instance. </summary>
+        /// <param name="subscriptionId"> The subscriptionId. </param>
+        /// <param name="resourceGroupName"> The resourceGroupName. </param>
+        /// <param name="mobileNetworkName"> The mobileNetworkName. </param>
         public static ResourceIdentifier CreateResourceIdentifier(string subscriptionId, string resourceGroupName, string mobileNetworkName)
         {
             var resourceId = $"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MobileNetwork/mobileNetworks/{mobileNetworkName}";
@@ -38,12 +41,15 @@ namespace Azure.ResourceManager.MobileNetwork
         private readonly MobileNetworksRestOperations _mobileNetworkRestClient;
         private readonly MobileNetworkData _data;
 
+        /// <summary> Gets the resource type for the operations. </summary>
+        public static readonly ResourceType ResourceType = "Microsoft.MobileNetwork/mobileNetworks";
+
         /// <summary> Initializes a new instance of the <see cref="MobileNetworkResource"/> class for mocking. </summary>
         protected MobileNetworkResource()
         {
         }
 
-        /// <summary> Initializes a new instance of the <see cref = "MobileNetworkResource"/> class. </summary>
+        /// <summary> Initializes a new instance of the <see cref="MobileNetworkResource"/> class. </summary>
         /// <param name="client"> The client parameters to use in these operations. </param>
         /// <param name="data"> The resource that is the target of operations. </param>
         internal MobileNetworkResource(ArmClient client, MobileNetworkData data) : this(client, data.Id)
@@ -64,9 +70,6 @@ namespace Azure.ResourceManager.MobileNetwork
 			ValidateResourceId(Id);
 #endif
         }
-
-        /// <summary> Gets the resource type for the operations. </summary>
-        public static readonly ResourceType ResourceType = "Microsoft.MobileNetwork/mobileNetworks";
 
         /// <summary> Gets whether or not the current instance has data. </summary>
         public virtual bool HasData { get; }
@@ -89,11 +92,11 @@ namespace Azure.ResourceManager.MobileNetwork
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, "Invalid resource type {0} expected {1}", id.ResourceType, ResourceType), nameof(id));
         }
 
-        /// <summary> Gets a collection of DataNetworkResources in the MobileNetwork. </summary>
-        /// <returns> An object representing collection of DataNetworkResources and their operations over a DataNetworkResource. </returns>
-        public virtual DataNetworkCollection GetDataNetworks()
+        /// <summary> Gets a collection of MobileDataNetworkResources in the MobileNetwork. </summary>
+        /// <returns> An object representing collection of MobileDataNetworkResources and their operations over a MobileDataNetworkResource. </returns>
+        public virtual MobileDataNetworkCollection GetMobileDataNetworks()
         {
-            return GetCachedClient(Client => new DataNetworkCollection(Client, Id));
+            return GetCachedClient(client => new MobileDataNetworkCollection(client, Id));
         }
 
         /// <summary>
@@ -111,12 +114,12 @@ namespace Azure.ResourceManager.MobileNetwork
         /// </summary>
         /// <param name="dataNetworkName"> The name of the data network. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="dataNetworkName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="dataNetworkName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="dataNetworkName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
-        public virtual async Task<Response<DataNetworkResource>> GetDataNetworkAsync(string dataNetworkName, CancellationToken cancellationToken = default)
+        public virtual async Task<Response<MobileDataNetworkResource>> GetMobileDataNetworkAsync(string dataNetworkName, CancellationToken cancellationToken = default)
         {
-            return await GetDataNetworks().GetAsync(dataNetworkName, cancellationToken).ConfigureAwait(false);
+            return await GetMobileDataNetworks().GetAsync(dataNetworkName, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -134,19 +137,19 @@ namespace Azure.ResourceManager.MobileNetwork
         /// </summary>
         /// <param name="dataNetworkName"> The name of the data network. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="dataNetworkName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="dataNetworkName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="dataNetworkName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
-        public virtual Response<DataNetworkResource> GetDataNetwork(string dataNetworkName, CancellationToken cancellationToken = default)
+        public virtual Response<MobileDataNetworkResource> GetMobileDataNetwork(string dataNetworkName, CancellationToken cancellationToken = default)
         {
-            return GetDataNetworks().Get(dataNetworkName, cancellationToken);
+            return GetMobileDataNetworks().Get(dataNetworkName, cancellationToken);
         }
 
-        /// <summary> Gets a collection of ServiceResources in the MobileNetwork. </summary>
-        /// <returns> An object representing collection of ServiceResources and their operations over a ServiceResource. </returns>
-        public virtual ServiceCollection GetServices()
+        /// <summary> Gets a collection of MobileNetworkServiceResources in the MobileNetwork. </summary>
+        /// <returns> An object representing collection of MobileNetworkServiceResources and their operations over a MobileNetworkServiceResource. </returns>
+        public virtual MobileNetworkServiceCollection GetMobileNetworkServices()
         {
-            return GetCachedClient(Client => new ServiceCollection(Client, Id));
+            return GetCachedClient(client => new MobileNetworkServiceCollection(client, Id));
         }
 
         /// <summary>
@@ -164,12 +167,12 @@ namespace Azure.ResourceManager.MobileNetwork
         /// </summary>
         /// <param name="serviceName"> The name of the service. You must not use any of the following reserved strings - `default`, `requested` or `service`. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="serviceName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="serviceName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="serviceName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
-        public virtual async Task<Response<ServiceResource>> GetServiceAsync(string serviceName, CancellationToken cancellationToken = default)
+        public virtual async Task<Response<MobileNetworkServiceResource>> GetMobileNetworkServiceAsync(string serviceName, CancellationToken cancellationToken = default)
         {
-            return await GetServices().GetAsync(serviceName, cancellationToken).ConfigureAwait(false);
+            return await GetMobileNetworkServices().GetAsync(serviceName, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -187,19 +190,19 @@ namespace Azure.ResourceManager.MobileNetwork
         /// </summary>
         /// <param name="serviceName"> The name of the service. You must not use any of the following reserved strings - `default`, `requested` or `service`. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="serviceName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="serviceName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="serviceName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
-        public virtual Response<ServiceResource> GetService(string serviceName, CancellationToken cancellationToken = default)
+        public virtual Response<MobileNetworkServiceResource> GetMobileNetworkService(string serviceName, CancellationToken cancellationToken = default)
         {
-            return GetServices().Get(serviceName, cancellationToken);
+            return GetMobileNetworkServices().Get(serviceName, cancellationToken);
         }
 
-        /// <summary> Gets a collection of SimPolicyResources in the MobileNetwork. </summary>
-        /// <returns> An object representing collection of SimPolicyResources and their operations over a SimPolicyResource. </returns>
-        public virtual SimPolicyCollection GetSimPolicies()
+        /// <summary> Gets a collection of MobileNetworkSimPolicyResources in the MobileNetwork. </summary>
+        /// <returns> An object representing collection of MobileNetworkSimPolicyResources and their operations over a MobileNetworkSimPolicyResource. </returns>
+        public virtual MobileNetworkSimPolicyCollection GetMobileNetworkSimPolicies()
         {
-            return GetCachedClient(Client => new SimPolicyCollection(Client, Id));
+            return GetCachedClient(client => new MobileNetworkSimPolicyCollection(client, Id));
         }
 
         /// <summary>
@@ -217,12 +220,12 @@ namespace Azure.ResourceManager.MobileNetwork
         /// </summary>
         /// <param name="simPolicyName"> The name of the SIM policy. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="simPolicyName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="simPolicyName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="simPolicyName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
-        public virtual async Task<Response<SimPolicyResource>> GetSimPolicyAsync(string simPolicyName, CancellationToken cancellationToken = default)
+        public virtual async Task<Response<MobileNetworkSimPolicyResource>> GetMobileNetworkSimPolicyAsync(string simPolicyName, CancellationToken cancellationToken = default)
         {
-            return await GetSimPolicies().GetAsync(simPolicyName, cancellationToken).ConfigureAwait(false);
+            return await GetMobileNetworkSimPolicies().GetAsync(simPolicyName, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -240,19 +243,19 @@ namespace Azure.ResourceManager.MobileNetwork
         /// </summary>
         /// <param name="simPolicyName"> The name of the SIM policy. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="simPolicyName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="simPolicyName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="simPolicyName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
-        public virtual Response<SimPolicyResource> GetSimPolicy(string simPolicyName, CancellationToken cancellationToken = default)
+        public virtual Response<MobileNetworkSimPolicyResource> GetMobileNetworkSimPolicy(string simPolicyName, CancellationToken cancellationToken = default)
         {
-            return GetSimPolicies().Get(simPolicyName, cancellationToken);
+            return GetMobileNetworkSimPolicies().Get(simPolicyName, cancellationToken);
         }
 
-        /// <summary> Gets a collection of SiteResources in the MobileNetwork. </summary>
-        /// <returns> An object representing collection of SiteResources and their operations over a SiteResource. </returns>
-        public virtual SiteCollection GetSites()
+        /// <summary> Gets a collection of MobileNetworkSiteResources in the MobileNetwork. </summary>
+        /// <returns> An object representing collection of MobileNetworkSiteResources and their operations over a MobileNetworkSiteResource. </returns>
+        public virtual MobileNetworkSiteCollection GetMobileNetworkSites()
         {
-            return GetCachedClient(Client => new SiteCollection(Client, Id));
+            return GetCachedClient(client => new MobileNetworkSiteCollection(client, Id));
         }
 
         /// <summary>
@@ -270,12 +273,12 @@ namespace Azure.ResourceManager.MobileNetwork
         /// </summary>
         /// <param name="siteName"> The name of the mobile network site. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="siteName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="siteName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="siteName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
-        public virtual async Task<Response<SiteResource>> GetSiteAsync(string siteName, CancellationToken cancellationToken = default)
+        public virtual async Task<Response<MobileNetworkSiteResource>> GetMobileNetworkSiteAsync(string siteName, CancellationToken cancellationToken = default)
         {
-            return await GetSites().GetAsync(siteName, cancellationToken).ConfigureAwait(false);
+            return await GetMobileNetworkSites().GetAsync(siteName, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -293,42 +296,19 @@ namespace Azure.ResourceManager.MobileNetwork
         /// </summary>
         /// <param name="siteName"> The name of the mobile network site. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="siteName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="siteName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="siteName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
-        public virtual Response<SiteResource> GetSite(string siteName, CancellationToken cancellationToken = default)
+        public virtual Response<MobileNetworkSiteResource> GetMobileNetworkSite(string siteName, CancellationToken cancellationToken = default)
         {
-            return GetSites().Get(siteName, cancellationToken);
+            return GetMobileNetworkSites().Get(siteName, cancellationToken);
         }
 
-        /// <summary> Gets a collection of SliceResources in the MobileNetwork. </summary>
-        /// <returns> An object representing collection of SliceResources and their operations over a SliceResource. </returns>
-        public virtual SliceCollection GetSlices()
+        /// <summary> Gets a collection of MobileNetworkSliceResources in the MobileNetwork. </summary>
+        /// <returns> An object representing collection of MobileNetworkSliceResources and their operations over a MobileNetworkSliceResource. </returns>
+        public virtual MobileNetworkSliceCollection GetMobileNetworkSlices()
         {
-            return GetCachedClient(Client => new SliceCollection(Client, Id));
-        }
-
-        /// <summary>
-        /// Gets information about the specified network slice.
-        /// <list type="bullet">
-        /// <item>
-        /// <term>Request Path</term>
-        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MobileNetwork/mobileNetworks/{mobileNetworkName}/slices/{sliceName}</description>
-        /// </item>
-        /// <item>
-        /// <term>Operation Id</term>
-        /// <description>Slices_Get</description>
-        /// </item>
-        /// </list>
-        /// </summary>
-        /// <param name="sliceName"> The name of the network slice. </param>
-        /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="sliceName"/> is an empty string, and was expected to be non-empty. </exception>
-        /// <exception cref="ArgumentNullException"> <paramref name="sliceName"/> is null. </exception>
-        [ForwardsClientCalls]
-        public virtual async Task<Response<SliceResource>> GetSliceAsync(string sliceName, CancellationToken cancellationToken = default)
-        {
-            return await GetSlices().GetAsync(sliceName, cancellationToken).ConfigureAwait(false);
+            return GetCachedClient(client => new MobileNetworkSliceCollection(client, Id));
         }
 
         /// <summary>
@@ -346,12 +326,35 @@ namespace Azure.ResourceManager.MobileNetwork
         /// </summary>
         /// <param name="sliceName"> The name of the network slice. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="sliceName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="sliceName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="sliceName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
-        public virtual Response<SliceResource> GetSlice(string sliceName, CancellationToken cancellationToken = default)
+        public virtual async Task<Response<MobileNetworkSliceResource>> GetMobileNetworkSliceAsync(string sliceName, CancellationToken cancellationToken = default)
         {
-            return GetSlices().Get(sliceName, cancellationToken);
+            return await GetMobileNetworkSlices().GetAsync(sliceName, cancellationToken).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Gets information about the specified network slice.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.MobileNetwork/mobileNetworks/{mobileNetworkName}/slices/{sliceName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>Slices_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="sliceName"> The name of the network slice. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="sliceName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="sliceName"/> is an empty string, and was expected to be non-empty. </exception>
+        [ForwardsClientCalls]
+        public virtual Response<MobileNetworkSliceResource> GetMobileNetworkSlice(string sliceName, CancellationToken cancellationToken = default)
+        {
+            return GetMobileNetworkSlices().Get(sliceName, cancellationToken);
         }
 
         /// <summary>
@@ -499,18 +502,18 @@ namespace Azure.ResourceManager.MobileNetwork
         /// </item>
         /// </list>
         /// </summary>
-        /// <param name="tagsObject"> Parameters supplied to update mobile network tags. </param>
+        /// <param name="patch"> Parameters supplied to update mobile network tags. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="tagsObject"/> is null. </exception>
-        public virtual async Task<Response<MobileNetworkResource>> UpdateAsync(TagsObject tagsObject, CancellationToken cancellationToken = default)
+        /// <exception cref="ArgumentNullException"> <paramref name="patch"/> is null. </exception>
+        public virtual async Task<Response<MobileNetworkResource>> UpdateAsync(MobileNetworkTagsPatch patch, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNull(tagsObject, nameof(tagsObject));
+            Argument.AssertNotNull(patch, nameof(patch));
 
             using var scope = _mobileNetworkClientDiagnostics.CreateScope("MobileNetworkResource.Update");
             scope.Start();
             try
             {
-                var response = await _mobileNetworkRestClient.UpdateTagsAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, tagsObject, cancellationToken).ConfigureAwait(false);
+                var response = await _mobileNetworkRestClient.UpdateTagsAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, patch, cancellationToken).ConfigureAwait(false);
                 return Response.FromValue(new MobileNetworkResource(Client, response.Value), response.GetRawResponse());
             }
             catch (Exception e)
@@ -533,18 +536,18 @@ namespace Azure.ResourceManager.MobileNetwork
         /// </item>
         /// </list>
         /// </summary>
-        /// <param name="tagsObject"> Parameters supplied to update mobile network tags. </param>
+        /// <param name="patch"> Parameters supplied to update mobile network tags. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="tagsObject"/> is null. </exception>
-        public virtual Response<MobileNetworkResource> Update(TagsObject tagsObject, CancellationToken cancellationToken = default)
+        /// <exception cref="ArgumentNullException"> <paramref name="patch"/> is null. </exception>
+        public virtual Response<MobileNetworkResource> Update(MobileNetworkTagsPatch patch, CancellationToken cancellationToken = default)
         {
-            Argument.AssertNotNull(tagsObject, nameof(tagsObject));
+            Argument.AssertNotNull(patch, nameof(patch));
 
             using var scope = _mobileNetworkClientDiagnostics.CreateScope("MobileNetworkResource.Update");
             scope.Start();
             try
             {
-                var response = _mobileNetworkRestClient.UpdateTags(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, tagsObject, cancellationToken);
+                var response = _mobileNetworkRestClient.UpdateTags(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, patch, cancellationToken);
                 return Response.FromValue(new MobileNetworkResource(Client, response.Value), response.GetRawResponse());
             }
             catch (Exception e)
@@ -591,7 +594,7 @@ namespace Azure.ResourceManager.MobileNetwork
                 else
                 {
                     var current = (await GetAsync(cancellationToken: cancellationToken).ConfigureAwait(false)).Value.Data;
-                    var patch = new TagsObject();
+                    var patch = new MobileNetworkTagsPatch();
                     foreach (var tag in current.Tags)
                     {
                         patch.Tags.Add(tag);
@@ -645,7 +648,7 @@ namespace Azure.ResourceManager.MobileNetwork
                 else
                 {
                     var current = Get(cancellationToken: cancellationToken).Value.Data;
-                    var patch = new TagsObject();
+                    var patch = new MobileNetworkTagsPatch();
                     foreach (var tag in current.Tags)
                     {
                         patch.Tags.Add(tag);
@@ -698,7 +701,7 @@ namespace Azure.ResourceManager.MobileNetwork
                 else
                 {
                     var current = (await GetAsync(cancellationToken: cancellationToken).ConfigureAwait(false)).Value.Data;
-                    var patch = new TagsObject();
+                    var patch = new MobileNetworkTagsPatch();
                     patch.Tags.ReplaceWith(tags);
                     var result = await UpdateAsync(patch, cancellationToken: cancellationToken).ConfigureAwait(false);
                     return result;
@@ -747,7 +750,7 @@ namespace Azure.ResourceManager.MobileNetwork
                 else
                 {
                     var current = Get(cancellationToken: cancellationToken).Value.Data;
-                    var patch = new TagsObject();
+                    var patch = new MobileNetworkTagsPatch();
                     patch.Tags.ReplaceWith(tags);
                     var result = Update(patch, cancellationToken: cancellationToken);
                     return result;
@@ -795,7 +798,7 @@ namespace Azure.ResourceManager.MobileNetwork
                 else
                 {
                     var current = (await GetAsync(cancellationToken: cancellationToken).ConfigureAwait(false)).Value.Data;
-                    var patch = new TagsObject();
+                    var patch = new MobileNetworkTagsPatch();
                     foreach (var tag in current.Tags)
                     {
                         patch.Tags.Add(tag);
@@ -847,7 +850,7 @@ namespace Azure.ResourceManager.MobileNetwork
                 else
                 {
                     var current = Get(cancellationToken: cancellationToken).Value.Data;
-                    var patch = new TagsObject();
+                    var patch = new MobileNetworkTagsPatch();
                     foreach (var tag in current.Tags)
                     {
                         patch.Tags.Add(tag);

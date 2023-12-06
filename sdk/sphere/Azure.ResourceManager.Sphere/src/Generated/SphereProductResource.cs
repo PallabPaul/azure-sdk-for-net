@@ -9,6 +9,7 @@ using System;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -19,13 +20,17 @@ namespace Azure.ResourceManager.Sphere
 {
     /// <summary>
     /// A Class representing a SphereProduct along with the instance operations that can be performed on it.
-    /// If you have a <see cref="ResourceIdentifier" /> you can construct a <see cref="SphereProductResource" />
-    /// from an instance of <see cref="ArmClient" /> using the GetSphereProductResource method.
-    /// Otherwise you can get one from its parent resource <see cref="SphereCatalogResource" /> using the GetSphereProduct method.
+    /// If you have a <see cref="ResourceIdentifier"/> you can construct a <see cref="SphereProductResource"/>
+    /// from an instance of <see cref="ArmClient"/> using the GetSphereProductResource method.
+    /// Otherwise you can get one from its parent resource <see cref="SphereCatalogResource"/> using the GetSphereProduct method.
     /// </summary>
     public partial class SphereProductResource : ArmResource
     {
         /// <summary> Generate the resource identifier of a <see cref="SphereProductResource"/> instance. </summary>
+        /// <param name="subscriptionId"> The subscriptionId. </param>
+        /// <param name="resourceGroupName"> The resourceGroupName. </param>
+        /// <param name="catalogName"> The catalogName. </param>
+        /// <param name="productName"> The productName. </param>
         public static ResourceIdentifier CreateResourceIdentifier(string subscriptionId, string resourceGroupName, string catalogName, string productName)
         {
             var resourceId = $"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AzureSphere/catalogs/{catalogName}/products/{productName}";
@@ -36,12 +41,15 @@ namespace Azure.ResourceManager.Sphere
         private readonly ProductsRestOperations _sphereProductProductsRestClient;
         private readonly SphereProductData _data;
 
+        /// <summary> Gets the resource type for the operations. </summary>
+        public static readonly ResourceType ResourceType = "Microsoft.AzureSphere/catalogs/products";
+
         /// <summary> Initializes a new instance of the <see cref="SphereProductResource"/> class for mocking. </summary>
         protected SphereProductResource()
         {
         }
 
-        /// <summary> Initializes a new instance of the <see cref = "SphereProductResource"/> class. </summary>
+        /// <summary> Initializes a new instance of the <see cref="SphereProductResource"/> class. </summary>
         /// <param name="client"> The client parameters to use in these operations. </param>
         /// <param name="data"> The resource that is the target of operations. </param>
         internal SphereProductResource(ArmClient client, SphereProductData data) : this(client, data.Id)
@@ -62,9 +70,6 @@ namespace Azure.ResourceManager.Sphere
 			ValidateResourceId(Id);
 #endif
         }
-
-        /// <summary> Gets the resource type for the operations. </summary>
-        public static readonly ResourceType ResourceType = "Microsoft.AzureSphere/catalogs/products";
 
         /// <summary> Gets whether or not the current instance has data. </summary>
         public virtual bool HasData { get; }
@@ -91,7 +96,7 @@ namespace Azure.ResourceManager.Sphere
         /// <returns> An object representing collection of SphereDeviceGroupResources and their operations over a SphereDeviceGroupResource. </returns>
         public virtual SphereDeviceGroupCollection GetSphereDeviceGroups()
         {
-            return GetCachedClient(Client => new SphereDeviceGroupCollection(Client, Id));
+            return GetCachedClient(client => new SphereDeviceGroupCollection(client, Id));
         }
 
         /// <summary>
@@ -109,8 +114,8 @@ namespace Azure.ResourceManager.Sphere
         /// </summary>
         /// <param name="deviceGroupName"> Name of device group. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="deviceGroupName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="deviceGroupName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="deviceGroupName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<SphereDeviceGroupResource>> GetSphereDeviceGroupAsync(string deviceGroupName, CancellationToken cancellationToken = default)
         {
@@ -132,8 +137,8 @@ namespace Azure.ResourceManager.Sphere
         /// </summary>
         /// <param name="deviceGroupName"> Name of device group. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="deviceGroupName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="deviceGroupName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="deviceGroupName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<SphereDeviceGroupResource> GetSphereDeviceGroup(string deviceGroupName, CancellationToken cancellationToken = default)
         {
@@ -422,12 +427,12 @@ namespace Azure.ResourceManager.Sphere
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="SphereDeviceGroupResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="SphereDeviceGroupResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<SphereDeviceGroupResource> GenerateDefaultDeviceGroupsAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _sphereProductProductsRestClient.CreateGenerateDefaultDeviceGroupsRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _sphereProductProductsRestClient.CreateGenerateDefaultDeviceGroupsNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new SphereDeviceGroupResource(Client, SphereDeviceGroupData.DeserializeSphereDeviceGroupData(e)), _sphereProductProductsClientDiagnostics, Pipeline, "SphereProductResource.GenerateDefaultDeviceGroups", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new SphereDeviceGroupResource(Client, SphereDeviceGroupData.DeserializeSphereDeviceGroupData(e)), _sphereProductProductsClientDiagnostics, Pipeline, "SphereProductResource.GenerateDefaultDeviceGroups", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -444,12 +449,12 @@ namespace Azure.ResourceManager.Sphere
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="SphereDeviceGroupResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="SphereDeviceGroupResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<SphereDeviceGroupResource> GenerateDefaultDeviceGroups(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _sphereProductProductsRestClient.CreateGenerateDefaultDeviceGroupsRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _sphereProductProductsRestClient.CreateGenerateDefaultDeviceGroupsNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name);
-            return PageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new SphereDeviceGroupResource(Client, SphereDeviceGroupData.DeserializeSphereDeviceGroupData(e)), _sphereProductProductsClientDiagnostics, Pipeline, "SphereProductResource.GenerateDefaultDeviceGroups", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new SphereDeviceGroupResource(Client, SphereDeviceGroupData.DeserializeSphereDeviceGroupData(e)), _sphereProductProductsClientDiagnostics, Pipeline, "SphereProductResource.GenerateDefaultDeviceGroups", "value", "nextLink", cancellationToken);
         }
     }
 }

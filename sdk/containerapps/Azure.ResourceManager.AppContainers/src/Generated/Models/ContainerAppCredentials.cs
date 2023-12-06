@@ -12,21 +12,23 @@ namespace Azure.ResourceManager.AppContainers.Models
     /// <summary> Container App credentials. </summary>
     public partial class ContainerAppCredentials
     {
-        /// <summary> Initializes a new instance of ContainerAppCredentials. </summary>
+        /// <summary> Initializes a new instance of <see cref="ContainerAppCredentials"/>. </summary>
         public ContainerAppCredentials()
         {
         }
 
-        /// <summary> Initializes a new instance of ContainerAppCredentials. </summary>
+        /// <summary> Initializes a new instance of <see cref="ContainerAppCredentials"/>. </summary>
         /// <param name="clientId"> Client Id. </param>
         /// <param name="clientSecret"> Client Secret. </param>
         /// <param name="tenantId"> Tenant Id. </param>
+        /// <param name="kind"> Kind of auth github does for deploying the template. </param>
         /// <param name="subscriptionId"> Subscription Id. </param>
-        internal ContainerAppCredentials(string clientId, string clientSecret, Guid? tenantId, string subscriptionId)
+        internal ContainerAppCredentials(string clientId, string clientSecret, Guid? tenantId, string kind, string subscriptionId)
         {
             ClientId = clientId;
             ClientSecret = clientSecret;
             TenantId = tenantId;
+            Kind = kind;
             SubscriptionId = subscriptionId;
         }
 
@@ -36,6 +38,8 @@ namespace Azure.ResourceManager.AppContainers.Models
         public string ClientSecret { get; set; }
         /// <summary> Tenant Id. </summary>
         public Guid? TenantId { get; set; }
+        /// <summary> Kind of auth github does for deploying the template. </summary>
+        public string Kind { get; set; }
         /// <summary> Subscription Id. </summary>
         public string SubscriptionId { get; set; }
     }

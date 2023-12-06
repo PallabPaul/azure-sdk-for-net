@@ -9,6 +9,7 @@ using System;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -19,13 +20,17 @@ namespace Azure.ResourceManager.ApiManagement
 {
     /// <summary>
     /// A Class representing an ApiManagementNotification along with the instance operations that can be performed on it.
-    /// If you have a <see cref="ResourceIdentifier" /> you can construct an <see cref="ApiManagementNotificationResource" />
-    /// from an instance of <see cref="ArmClient" /> using the GetApiManagementNotificationResource method.
-    /// Otherwise you can get one from its parent resource <see cref="ApiManagementServiceResource" /> using the GetApiManagementNotification method.
+    /// If you have a <see cref="ResourceIdentifier"/> you can construct an <see cref="ApiManagementNotificationResource"/>
+    /// from an instance of <see cref="ArmClient"/> using the GetApiManagementNotificationResource method.
+    /// Otherwise you can get one from its parent resource <see cref="ApiManagementServiceResource"/> using the GetApiManagementNotification method.
     /// </summary>
     public partial class ApiManagementNotificationResource : ArmResource
     {
         /// <summary> Generate the resource identifier of a <see cref="ApiManagementNotificationResource"/> instance. </summary>
+        /// <param name="subscriptionId"> The subscriptionId. </param>
+        /// <param name="resourceGroupName"> The resourceGroupName. </param>
+        /// <param name="serviceName"> The serviceName. </param>
+        /// <param name="notificationName"> The notificationName. </param>
         public static ResourceIdentifier CreateResourceIdentifier(string subscriptionId, string resourceGroupName, string serviceName, NotificationName notificationName)
         {
             var resourceId = $"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ApiManagement/service/{serviceName}/notifications/{notificationName}";
@@ -40,12 +45,15 @@ namespace Azure.ResourceManager.ApiManagement
         private readonly NotificationRecipientEmailRestOperations _notificationRecipientEmailRestClient;
         private readonly ApiManagementNotificationData _data;
 
+        /// <summary> Gets the resource type for the operations. </summary>
+        public static readonly ResourceType ResourceType = "Microsoft.ApiManagement/service/notifications";
+
         /// <summary> Initializes a new instance of the <see cref="ApiManagementNotificationResource"/> class for mocking. </summary>
         protected ApiManagementNotificationResource()
         {
         }
 
-        /// <summary> Initializes a new instance of the <see cref = "ApiManagementNotificationResource"/> class. </summary>
+        /// <summary> Initializes a new instance of the <see cref="ApiManagementNotificationResource"/> class. </summary>
         /// <param name="client"> The client parameters to use in these operations. </param>
         /// <param name="data"> The resource that is the target of operations. </param>
         internal ApiManagementNotificationResource(ArmClient client, ApiManagementNotificationData data) : this(client, data.Id)
@@ -70,9 +78,6 @@ namespace Azure.ResourceManager.ApiManagement
 			ValidateResourceId(Id);
 #endif
         }
-
-        /// <summary> Gets the resource type for the operations. </summary>
-        public static readonly ResourceType ResourceType = "Microsoft.ApiManagement/service/notifications";
 
         /// <summary> Gets whether or not the current instance has data. </summary>
         public virtual bool HasData { get; }
@@ -243,11 +248,11 @@ namespace Azure.ResourceManager.ApiManagement
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="RecipientUserContract" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="RecipientUserContract"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<RecipientUserContract> GetNotificationRecipientUsersAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _notificationRecipientUserRestClient.CreateListByNotificationRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, null, RecipientUserContract.DeserializeRecipientUserContract, _notificationRecipientUserClientDiagnostics, Pipeline, "ApiManagementNotificationResource.GetNotificationRecipientUsers", "value", null, cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, null, RecipientUserContract.DeserializeRecipientUserContract, _notificationRecipientUserClientDiagnostics, Pipeline, "ApiManagementNotificationResource.GetNotificationRecipientUsers", "value", null, cancellationToken);
         }
 
         /// <summary>
@@ -264,11 +269,11 @@ namespace Azure.ResourceManager.ApiManagement
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="RecipientUserContract" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="RecipientUserContract"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<RecipientUserContract> GetNotificationRecipientUsers(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _notificationRecipientUserRestClient.CreateListByNotificationRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name);
-            return PageableHelpers.CreatePageable(FirstPageRequest, null, RecipientUserContract.DeserializeRecipientUserContract, _notificationRecipientUserClientDiagnostics, Pipeline, "ApiManagementNotificationResource.GetNotificationRecipientUsers", "value", null, cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, null, RecipientUserContract.DeserializeRecipientUserContract, _notificationRecipientUserClientDiagnostics, Pipeline, "ApiManagementNotificationResource.GetNotificationRecipientUsers", "value", null, cancellationToken);
         }
 
         /// <summary>
@@ -495,11 +500,11 @@ namespace Azure.ResourceManager.ApiManagement
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="RecipientEmailContract" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="RecipientEmailContract"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<RecipientEmailContract> GetNotificationRecipientEmailsAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _notificationRecipientEmailRestClient.CreateListByNotificationRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, null, RecipientEmailContract.DeserializeRecipientEmailContract, _notificationRecipientEmailClientDiagnostics, Pipeline, "ApiManagementNotificationResource.GetNotificationRecipientEmails", "value", null, cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, null, RecipientEmailContract.DeserializeRecipientEmailContract, _notificationRecipientEmailClientDiagnostics, Pipeline, "ApiManagementNotificationResource.GetNotificationRecipientEmails", "value", null, cancellationToken);
         }
 
         /// <summary>
@@ -516,11 +521,11 @@ namespace Azure.ResourceManager.ApiManagement
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="RecipientEmailContract" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="RecipientEmailContract"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<RecipientEmailContract> GetNotificationRecipientEmails(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _notificationRecipientEmailRestClient.CreateListByNotificationRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name);
-            return PageableHelpers.CreatePageable(FirstPageRequest, null, RecipientEmailContract.DeserializeRecipientEmailContract, _notificationRecipientEmailClientDiagnostics, Pipeline, "ApiManagementNotificationResource.GetNotificationRecipientEmails", "value", null, cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, null, RecipientEmailContract.DeserializeRecipientEmailContract, _notificationRecipientEmailClientDiagnostics, Pipeline, "ApiManagementNotificationResource.GetNotificationRecipientEmails", "value", null, cancellationToken);
         }
 
         /// <summary>

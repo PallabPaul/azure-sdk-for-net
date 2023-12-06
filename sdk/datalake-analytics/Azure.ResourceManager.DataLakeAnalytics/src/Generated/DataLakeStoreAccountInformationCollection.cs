@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -20,9 +21,9 @@ using Azure.ResourceManager.DataLakeAnalytics.Models;
 namespace Azure.ResourceManager.DataLakeAnalytics
 {
     /// <summary>
-    /// A class representing a collection of <see cref="DataLakeStoreAccountInformationResource" /> and their operations.
-    /// Each <see cref="DataLakeStoreAccountInformationResource" /> in the collection will belong to the same instance of <see cref="DataLakeAnalyticsAccountResource" />.
-    /// To get a <see cref="DataLakeStoreAccountInformationCollection" /> instance call the GetDataLakeStoreAccountInformation method from an instance of <see cref="DataLakeAnalyticsAccountResource" />.
+    /// A class representing a collection of <see cref="DataLakeStoreAccountInformationResource"/> and their operations.
+    /// Each <see cref="DataLakeStoreAccountInformationResource"/> in the collection will belong to the same instance of <see cref="DataLakeAnalyticsAccountResource"/>.
+    /// To get a <see cref="DataLakeStoreAccountInformationCollection"/> instance call the GetDataLakeStoreAccountInformation method from an instance of <see cref="DataLakeAnalyticsAccountResource"/>.
     /// </summary>
     public partial class DataLakeStoreAccountInformationCollection : ArmCollection, IEnumerable<DataLakeStoreAccountInformationResource>, IAsyncEnumerable<DataLakeStoreAccountInformationResource>
     {
@@ -224,14 +225,14 @@ namespace Azure.ResourceManager.DataLakeAnalytics
         /// </summary>
         /// <param name="options"> A property bag which contains all the parameters of this method except the LRO qualifier and request context parameter. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="DataLakeStoreAccountInformationResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="DataLakeStoreAccountInformationResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<DataLakeStoreAccountInformationResource> GetAllAsync(DataLakeStoreAccountInformationCollectionGetAllOptions options, CancellationToken cancellationToken = default)
         {
             options ??= new DataLakeStoreAccountInformationCollectionGetAllOptions();
 
             HttpMessage FirstPageRequest(int? pageSizeHint) => _dataLakeStoreAccountInformationDataLakeStoreAccountsRestClient.CreateListByAccountRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, options.Filter, options.Top, options.Skip, options.Select, options.Orderby, options.Count);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _dataLakeStoreAccountInformationDataLakeStoreAccountsRestClient.CreateListByAccountNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Name, options.Filter, options.Top, options.Skip, options.Select, options.Orderby, options.Count);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new DataLakeStoreAccountInformationResource(Client, DataLakeStoreAccountInformationData.DeserializeDataLakeStoreAccountInformationData(e)), _dataLakeStoreAccountInformationDataLakeStoreAccountsClientDiagnostics, Pipeline, "DataLakeStoreAccountInformationCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new DataLakeStoreAccountInformationResource(Client, DataLakeStoreAccountInformationData.DeserializeDataLakeStoreAccountInformationData(e)), _dataLakeStoreAccountInformationDataLakeStoreAccountsClientDiagnostics, Pipeline, "DataLakeStoreAccountInformationCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -249,14 +250,14 @@ namespace Azure.ResourceManager.DataLakeAnalytics
         /// </summary>
         /// <param name="options"> A property bag which contains all the parameters of this method except the LRO qualifier and request context parameter. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="DataLakeStoreAccountInformationResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="DataLakeStoreAccountInformationResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<DataLakeStoreAccountInformationResource> GetAll(DataLakeStoreAccountInformationCollectionGetAllOptions options, CancellationToken cancellationToken = default)
         {
             options ??= new DataLakeStoreAccountInformationCollectionGetAllOptions();
 
             HttpMessage FirstPageRequest(int? pageSizeHint) => _dataLakeStoreAccountInformationDataLakeStoreAccountsRestClient.CreateListByAccountRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, options.Filter, options.Top, options.Skip, options.Select, options.Orderby, options.Count);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _dataLakeStoreAccountInformationDataLakeStoreAccountsRestClient.CreateListByAccountNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Name, options.Filter, options.Top, options.Skip, options.Select, options.Orderby, options.Count);
-            return PageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new DataLakeStoreAccountInformationResource(Client, DataLakeStoreAccountInformationData.DeserializeDataLakeStoreAccountInformationData(e)), _dataLakeStoreAccountInformationDataLakeStoreAccountsClientDiagnostics, Pipeline, "DataLakeStoreAccountInformationCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new DataLakeStoreAccountInformationResource(Client, DataLakeStoreAccountInformationData.DeserializeDataLakeStoreAccountInformationData(e)), _dataLakeStoreAccountInformationDataLakeStoreAccountsClientDiagnostics, Pipeline, "DataLakeStoreAccountInformationCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -321,6 +322,80 @@ namespace Azure.ResourceManager.DataLakeAnalytics
             {
                 var response = _dataLakeStoreAccountInformationDataLakeStoreAccountsRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, dataLakeStoreAccountName, cancellationToken: cancellationToken);
                 return Response.FromValue(response.Value != null, response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeAnalytics/accounts/{accountName}/dataLakeStoreAccounts/{dataLakeStoreAccountName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>DataLakeStoreAccounts_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="dataLakeStoreAccountName"> The name of the Data Lake Store account to retrieve. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="dataLakeStoreAccountName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="dataLakeStoreAccountName"/> is null. </exception>
+        public virtual async Task<NullableResponse<DataLakeStoreAccountInformationResource>> GetIfExistsAsync(string dataLakeStoreAccountName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(dataLakeStoreAccountName, nameof(dataLakeStoreAccountName));
+
+            using var scope = _dataLakeStoreAccountInformationDataLakeStoreAccountsClientDiagnostics.CreateScope("DataLakeStoreAccountInformationCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = await _dataLakeStoreAccountInformationDataLakeStoreAccountsRestClient.GetAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, dataLakeStoreAccountName, cancellationToken: cancellationToken).ConfigureAwait(false);
+                if (response.Value == null)
+                    return new NoValueResponse<DataLakeStoreAccountInformationResource>(response.GetRawResponse());
+                return Response.FromValue(new DataLakeStoreAccountInformationResource(Client, response.Value), response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataLakeAnalytics/accounts/{accountName}/dataLakeStoreAccounts/{dataLakeStoreAccountName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>DataLakeStoreAccounts_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="dataLakeStoreAccountName"> The name of the Data Lake Store account to retrieve. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="dataLakeStoreAccountName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="dataLakeStoreAccountName"/> is null. </exception>
+        public virtual NullableResponse<DataLakeStoreAccountInformationResource> GetIfExists(string dataLakeStoreAccountName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(dataLakeStoreAccountName, nameof(dataLakeStoreAccountName));
+
+            using var scope = _dataLakeStoreAccountInformationDataLakeStoreAccountsClientDiagnostics.CreateScope("DataLakeStoreAccountInformationCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = _dataLakeStoreAccountInformationDataLakeStoreAccountsRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, dataLakeStoreAccountName, cancellationToken: cancellationToken);
+                if (response.Value == null)
+                    return new NoValueResponse<DataLakeStoreAccountInformationResource>(response.GetRawResponse());
+                return Response.FromValue(new DataLakeStoreAccountInformationResource(Client, response.Value), response.GetRawResponse());
             }
             catch (Exception e)
             {

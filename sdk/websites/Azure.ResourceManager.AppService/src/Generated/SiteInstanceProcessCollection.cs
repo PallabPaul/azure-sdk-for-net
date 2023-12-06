@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -19,9 +20,9 @@ using Azure.ResourceManager;
 namespace Azure.ResourceManager.AppService
 {
     /// <summary>
-    /// A class representing a collection of <see cref="SiteInstanceProcessResource" /> and their operations.
-    /// Each <see cref="SiteInstanceProcessResource" /> in the collection will belong to the same instance of <see cref="SiteInstanceResource" />.
-    /// To get a <see cref="SiteInstanceProcessCollection" /> instance call the GetSiteInstanceProcesses method from an instance of <see cref="SiteInstanceResource" />.
+    /// A class representing a collection of <see cref="SiteInstanceProcessResource"/> and their operations.
+    /// Each <see cref="SiteInstanceProcessResource"/> in the collection will belong to the same instance of <see cref="SiteInstanceResource"/>.
+    /// To get a <see cref="SiteInstanceProcessCollection"/> instance call the GetSiteInstanceProcesses method from an instance of <see cref="SiteInstanceResource"/>.
     /// </summary>
     public partial class SiteInstanceProcessCollection : ArmCollection, IEnumerable<SiteInstanceProcessResource>, IAsyncEnumerable<SiteInstanceProcessResource>
     {
@@ -140,12 +141,12 @@ namespace Azure.ResourceManager.AppService
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="SiteInstanceProcessResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="SiteInstanceProcessResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<SiteInstanceProcessResource> GetAllAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _siteInstanceProcessWebAppsRestClient.CreateListInstanceProcessesRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _siteInstanceProcessWebAppsRestClient.CreateListInstanceProcessesNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new SiteInstanceProcessResource(Client, ProcessInfoData.DeserializeProcessInfoData(e)), _siteInstanceProcessWebAppsClientDiagnostics, Pipeline, "SiteInstanceProcessCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new SiteInstanceProcessResource(Client, ProcessInfoData.DeserializeProcessInfoData(e)), _siteInstanceProcessWebAppsClientDiagnostics, Pipeline, "SiteInstanceProcessCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -162,12 +163,12 @@ namespace Azure.ResourceManager.AppService
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="SiteInstanceProcessResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="SiteInstanceProcessResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<SiteInstanceProcessResource> GetAll(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _siteInstanceProcessWebAppsRestClient.CreateListInstanceProcessesRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _siteInstanceProcessWebAppsRestClient.CreateListInstanceProcessesNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name);
-            return PageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new SiteInstanceProcessResource(Client, ProcessInfoData.DeserializeProcessInfoData(e)), _siteInstanceProcessWebAppsClientDiagnostics, Pipeline, "SiteInstanceProcessCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new SiteInstanceProcessResource(Client, ProcessInfoData.DeserializeProcessInfoData(e)), _siteInstanceProcessWebAppsClientDiagnostics, Pipeline, "SiteInstanceProcessCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -232,6 +233,80 @@ namespace Azure.ResourceManager.AppService
             {
                 var response = _siteInstanceProcessWebAppsRestClient.GetInstanceProcess(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, processId, cancellationToken: cancellationToken);
                 return Response.FromValue(response.Value != null, response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/instances/{instanceId}/processes/{processId}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>WebApps_GetInstanceProcess</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="processId"> PID. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="processId"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="processId"/> is null. </exception>
+        public virtual async Task<NullableResponse<SiteInstanceProcessResource>> GetIfExistsAsync(string processId, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(processId, nameof(processId));
+
+            using var scope = _siteInstanceProcessWebAppsClientDiagnostics.CreateScope("SiteInstanceProcessCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = await _siteInstanceProcessWebAppsRestClient.GetInstanceProcessAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, processId, cancellationToken: cancellationToken).ConfigureAwait(false);
+                if (response.Value == null)
+                    return new NoValueResponse<SiteInstanceProcessResource>(response.GetRawResponse());
+                return Response.FromValue(new SiteInstanceProcessResource(Client, response.Value), response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/instances/{instanceId}/processes/{processId}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>WebApps_GetInstanceProcess</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="processId"> PID. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="processId"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="processId"/> is null. </exception>
+        public virtual NullableResponse<SiteInstanceProcessResource> GetIfExists(string processId, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(processId, nameof(processId));
+
+            using var scope = _siteInstanceProcessWebAppsClientDiagnostics.CreateScope("SiteInstanceProcessCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = _siteInstanceProcessWebAppsRestClient.GetInstanceProcess(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, processId, cancellationToken: cancellationToken);
+                if (response.Value == null)
+                    return new NoValueResponse<SiteInstanceProcessResource>(response.GetRawResponse());
+                return Response.FromValue(new SiteInstanceProcessResource(Client, response.Value), response.GetRawResponse());
             }
             catch (Exception e)
             {

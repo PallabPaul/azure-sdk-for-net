@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -21,13 +22,16 @@ namespace Azure.ResourceManager.ExtendedLocations
 {
     /// <summary>
     /// A Class representing a CustomLocation along with the instance operations that can be performed on it.
-    /// If you have a <see cref="ResourceIdentifier" /> you can construct a <see cref="CustomLocationResource" />
-    /// from an instance of <see cref="ArmClient" /> using the GetCustomLocationResource method.
-    /// Otherwise you can get one from its parent resource <see cref="ResourceGroupResource" /> using the GetCustomLocation method.
+    /// If you have a <see cref="ResourceIdentifier"/> you can construct a <see cref="CustomLocationResource"/>
+    /// from an instance of <see cref="ArmClient"/> using the GetCustomLocationResource method.
+    /// Otherwise you can get one from its parent resource <see cref="ResourceGroupResource"/> using the GetCustomLocation method.
     /// </summary>
     public partial class CustomLocationResource : ArmResource
     {
         /// <summary> Generate the resource identifier of a <see cref="CustomLocationResource"/> instance. </summary>
+        /// <param name="subscriptionId"> The subscriptionId. </param>
+        /// <param name="resourceGroupName"> The resourceGroupName. </param>
+        /// <param name="resourceName"> The resourceName. </param>
         public static ResourceIdentifier CreateResourceIdentifier(string subscriptionId, string resourceGroupName, string resourceName)
         {
             var resourceId = $"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ExtendedLocation/customLocations/{resourceName}";
@@ -38,12 +42,15 @@ namespace Azure.ResourceManager.ExtendedLocations
         private readonly CustomLocationsRestOperations _customLocationRestClient;
         private readonly CustomLocationData _data;
 
+        /// <summary> Gets the resource type for the operations. </summary>
+        public static readonly ResourceType ResourceType = "Microsoft.ExtendedLocation/customLocations";
+
         /// <summary> Initializes a new instance of the <see cref="CustomLocationResource"/> class for mocking. </summary>
         protected CustomLocationResource()
         {
         }
 
-        /// <summary> Initializes a new instance of the <see cref = "CustomLocationResource"/> class. </summary>
+        /// <summary> Initializes a new instance of the <see cref="CustomLocationResource"/> class. </summary>
         /// <param name="client"> The client parameters to use in these operations. </param>
         /// <param name="data"> The resource that is the target of operations. </param>
         internal CustomLocationResource(ArmClient client, CustomLocationData data) : this(client, data.Id)
@@ -64,9 +71,6 @@ namespace Azure.ResourceManager.ExtendedLocations
 			ValidateResourceId(Id);
 #endif
         }
-
-        /// <summary> Gets the resource type for the operations. </summary>
-        public static readonly ResourceType ResourceType = "Microsoft.ExtendedLocation/customLocations";
 
         /// <summary> Gets whether or not the current instance has data. </summary>
         public virtual bool HasData { get; }
@@ -303,12 +307,12 @@ namespace Azure.ResourceManager.ExtendedLocations
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="CustomLocationEnabledResourceType" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="CustomLocationEnabledResourceType"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<CustomLocationEnabledResourceType> GetEnabledResourceTypesAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _customLocationRestClient.CreateListEnabledResourceTypesRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _customLocationRestClient.CreateListEnabledResourceTypesNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, CustomLocationEnabledResourceType.DeserializeCustomLocationEnabledResourceType, _customLocationClientDiagnostics, Pipeline, "CustomLocationResource.GetEnabledResourceTypes", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, CustomLocationEnabledResourceType.DeserializeCustomLocationEnabledResourceType, _customLocationClientDiagnostics, Pipeline, "CustomLocationResource.GetEnabledResourceTypes", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -325,12 +329,12 @@ namespace Azure.ResourceManager.ExtendedLocations
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="CustomLocationEnabledResourceType" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="CustomLocationEnabledResourceType"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<CustomLocationEnabledResourceType> GetEnabledResourceTypes(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _customLocationRestClient.CreateListEnabledResourceTypesRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _customLocationRestClient.CreateListEnabledResourceTypesNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, CustomLocationEnabledResourceType.DeserializeCustomLocationEnabledResourceType, _customLocationClientDiagnostics, Pipeline, "CustomLocationResource.GetEnabledResourceTypes", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, CustomLocationEnabledResourceType.DeserializeCustomLocationEnabledResourceType, _customLocationClientDiagnostics, Pipeline, "CustomLocationResource.GetEnabledResourceTypes", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>

@@ -21,14 +21,13 @@ namespace Azure.Identity
         internal string[] AdditionallyAllowedTenantIds { get; }
         internal string ClientId { get; }
         internal string LoginHint { get; }
-        internal BrowserCustomizationOptions BrowserCustomizedOptions { get; }
+        internal BrowserCustomizationOptions BrowserCustomization { get; }
         internal MsalPublicClient Client { get; }
         internal CredentialPipeline Pipeline { get; }
         internal bool DisableAutomaticAuthentication { get; }
         internal AuthenticationRecord Record { get; private set; }
-        internal bool _isCaeEnabledRequestCached = false;
-        internal bool _isCaeDisabledRequestCached = false;
         internal string DefaultScope { get; }
+        internal TenantIdResolverBase TenantIdResolver { get; }
 
         private const string AuthenticationRequiredMessage = "Interactive authentication is needed to acquire token. Call Authenticate to interactively authenticate.";
         private const string NoDefaultScopeMessage = "Authenticating in this environment requires specifying a TokenRequestContext.";
@@ -89,9 +88,10 @@ namespace Azure.Identity
             var redirectUrl = (options as InteractiveBrowserCredentialOptions)?.RedirectUri?.AbsoluteUri ?? Constants.DefaultRedirectUrl;
             DefaultScope = AzureAuthorityHosts.GetDefaultScope(options?.AuthorityHost ?? AzureAuthorityHosts.GetDefault());
             Client = client ?? new MsalPublicClient(Pipeline, tenantId, clientId, redirectUrl, options);
+            TenantIdResolver = options?.TenantIdResolver ?? TenantIdResolverBase.Default;
             AdditionallyAllowedTenantIds = TenantIdResolver.ResolveAddionallyAllowedTenantIds((options as ISupportsAdditionallyAllowedTenants)?.AdditionallyAllowedTenants);
             Record = (options as InteractiveBrowserCredentialOptions)?.AuthenticationRecord;
-            BrowserCustomizedOptions = (options as InteractiveBrowserCredentialOptions)?.BrowserCustomizedOptions;
+            BrowserCustomization = (options as InteractiveBrowserCredentialOptions)?.BrowserCustomization;
         }
 
         /// <summary>
@@ -197,13 +197,7 @@ namespace Azure.Identity
                 Exception inner = null;
 
                 var tenantId = TenantIdResolver.Resolve(TenantId ?? Record?.TenantId, requestContext, AdditionallyAllowedTenantIds);
-                var isCachePopulated = Record switch
-                {
-                    not null when requestContext.IsCaeEnabled && _isCaeEnabledRequestCached => true,
-                    not null when !requestContext.IsCaeEnabled && _isCaeDisabledRequestCached => true,
-                    _ => false
-                };
-                if (isCachePopulated)
+                if (Record is not null)
                 {
                     try
                     {
@@ -242,18 +236,10 @@ namespace Azure.Identity
 
             var tenantId = TenantIdResolver.Resolve(TenantId ?? Record?.TenantId, context, AdditionallyAllowedTenantIds);
             AuthenticationResult result = await Client
-                .AcquireTokenInteractiveAsync(context.Scopes, context.Claims, prompt, LoginHint, tenantId, context.IsCaeEnabled, BrowserCustomizedOptions, async, cancellationToken)
+                .AcquireTokenInteractiveAsync(context.Scopes, context.Claims, prompt, LoginHint, tenantId, context.IsCaeEnabled, BrowserCustomization, async, cancellationToken)
                 .ConfigureAwait(false);
 
             Record = new AuthenticationRecord(result, ClientId);
-            if (context.IsCaeEnabled)
-            {
-                _isCaeEnabledRequestCached = true;
-            }
-            else
-            {
-                _isCaeDisabledRequestCached = true;
-            }
             return new AccessToken(result.AccessToken, result.ExpiresOn);
         }
     }

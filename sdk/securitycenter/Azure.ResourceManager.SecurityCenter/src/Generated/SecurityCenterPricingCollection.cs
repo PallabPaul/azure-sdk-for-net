@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -20,9 +21,9 @@ using Azure.ResourceManager.Resources;
 namespace Azure.ResourceManager.SecurityCenter
 {
     /// <summary>
-    /// A class representing a collection of <see cref="SecurityCenterPricingResource" /> and their operations.
-    /// Each <see cref="SecurityCenterPricingResource" /> in the collection will belong to the same instance of <see cref="SubscriptionResource" />.
-    /// To get a <see cref="SecurityCenterPricingCollection" /> instance call the GetSecurityCenterPricings method from an instance of <see cref="SubscriptionResource" />.
+    /// A class representing a collection of <see cref="SecurityCenterPricingResource"/> and their operations.
+    /// Each <see cref="SecurityCenterPricingResource"/> in the collection will belong to the same instance of <see cref="SubscriptionResource"/>.
+    /// To get a <see cref="SecurityCenterPricingCollection"/> instance call the GetSecurityCenterPricings method from an instance of <see cref="SubscriptionResource"/>.
     /// </summary>
     public partial class SecurityCenterPricingCollection : ArmCollection, IEnumerable<SecurityCenterPricingResource>, IAsyncEnumerable<SecurityCenterPricingResource>
     {
@@ -223,11 +224,11 @@ namespace Azure.ResourceManager.SecurityCenter
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="SecurityCenterPricingResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="SecurityCenterPricingResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<SecurityCenterPricingResource> GetAllAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _securityCenterPricingPricingsRestClient.CreateListRequest(Id.SubscriptionId);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, null, e => new SecurityCenterPricingResource(Client, SecurityCenterPricingData.DeserializeSecurityCenterPricingData(e)), _securityCenterPricingPricingsClientDiagnostics, Pipeline, "SecurityCenterPricingCollection.GetAll", "value", null, cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, null, e => new SecurityCenterPricingResource(Client, SecurityCenterPricingData.DeserializeSecurityCenterPricingData(e)), _securityCenterPricingPricingsClientDiagnostics, Pipeline, "SecurityCenterPricingCollection.GetAll", "value", null, cancellationToken);
         }
 
         /// <summary>
@@ -244,11 +245,11 @@ namespace Azure.ResourceManager.SecurityCenter
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="SecurityCenterPricingResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="SecurityCenterPricingResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<SecurityCenterPricingResource> GetAll(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _securityCenterPricingPricingsRestClient.CreateListRequest(Id.SubscriptionId);
-            return PageableHelpers.CreatePageable(FirstPageRequest, null, e => new SecurityCenterPricingResource(Client, SecurityCenterPricingData.DeserializeSecurityCenterPricingData(e)), _securityCenterPricingPricingsClientDiagnostics, Pipeline, "SecurityCenterPricingCollection.GetAll", "value", null, cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, null, e => new SecurityCenterPricingResource(Client, SecurityCenterPricingData.DeserializeSecurityCenterPricingData(e)), _securityCenterPricingPricingsClientDiagnostics, Pipeline, "SecurityCenterPricingCollection.GetAll", "value", null, cancellationToken);
         }
 
         /// <summary>
@@ -313,6 +314,80 @@ namespace Azure.ResourceManager.SecurityCenter
             {
                 var response = _securityCenterPricingPricingsRestClient.Get(Id.SubscriptionId, pricingName, cancellationToken: cancellationToken);
                 return Response.FromValue(response.Value != null, response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/providers/Microsoft.Security/pricings/{pricingName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>Pricings_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="pricingName"> name of the pricing configuration. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="pricingName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="pricingName"/> is null. </exception>
+        public virtual async Task<NullableResponse<SecurityCenterPricingResource>> GetIfExistsAsync(string pricingName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(pricingName, nameof(pricingName));
+
+            using var scope = _securityCenterPricingPricingsClientDiagnostics.CreateScope("SecurityCenterPricingCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = await _securityCenterPricingPricingsRestClient.GetAsync(Id.SubscriptionId, pricingName, cancellationToken: cancellationToken).ConfigureAwait(false);
+                if (response.Value == null)
+                    return new NoValueResponse<SecurityCenterPricingResource>(response.GetRawResponse());
+                return Response.FromValue(new SecurityCenterPricingResource(Client, response.Value), response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/providers/Microsoft.Security/pricings/{pricingName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>Pricings_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="pricingName"> name of the pricing configuration. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="pricingName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="pricingName"/> is null. </exception>
+        public virtual NullableResponse<SecurityCenterPricingResource> GetIfExists(string pricingName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(pricingName, nameof(pricingName));
+
+            using var scope = _securityCenterPricingPricingsClientDiagnostics.CreateScope("SecurityCenterPricingCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = _securityCenterPricingPricingsRestClient.Get(Id.SubscriptionId, pricingName, cancellationToken: cancellationToken);
+                if (response.Value == null)
+                    return new NoValueResponse<SecurityCenterPricingResource>(response.GetRawResponse());
+                return Response.FromValue(new SecurityCenterPricingResource(Client, response.Value), response.GetRawResponse());
             }
             catch (Exception e)
             {

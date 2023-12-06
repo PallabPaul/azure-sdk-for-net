@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -19,9 +20,9 @@ using Azure.ResourceManager;
 namespace Azure.ResourceManager.Workloads
 {
     /// <summary>
-    /// A class representing a collection of <see cref="SapDatabaseInstanceResource" /> and their operations.
-    /// Each <see cref="SapDatabaseInstanceResource" /> in the collection will belong to the same instance of <see cref="SapVirtualInstanceResource" />.
-    /// To get a <see cref="SapDatabaseInstanceCollection" /> instance call the GetSapDatabaseInstances method from an instance of <see cref="SapVirtualInstanceResource" />.
+    /// A class representing a collection of <see cref="SapDatabaseInstanceResource"/> and their operations.
+    /// Each <see cref="SapDatabaseInstanceResource"/> in the collection will belong to the same instance of <see cref="SapVirtualInstanceResource"/>.
+    /// To get a <see cref="SapDatabaseInstanceCollection"/> instance call the GetSapDatabaseInstances method from an instance of <see cref="SapVirtualInstanceResource"/>.
     /// </summary>
     public partial class SapDatabaseInstanceCollection : ArmCollection, IEnumerable<SapDatabaseInstanceResource>, IAsyncEnumerable<SapDatabaseInstanceResource>
     {
@@ -222,12 +223,12 @@ namespace Azure.ResourceManager.Workloads
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="SapDatabaseInstanceResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="SapDatabaseInstanceResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<SapDatabaseInstanceResource> GetAllAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _sapDatabaseInstanceSapDatabaseInstancesRestClient.CreateListRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _sapDatabaseInstanceSapDatabaseInstancesRestClient.CreateListNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new SapDatabaseInstanceResource(Client, SapDatabaseInstanceData.DeserializeSapDatabaseInstanceData(e)), _sapDatabaseInstanceSapDatabaseInstancesClientDiagnostics, Pipeline, "SapDatabaseInstanceCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new SapDatabaseInstanceResource(Client, SapDatabaseInstanceData.DeserializeSapDatabaseInstanceData(e)), _sapDatabaseInstanceSapDatabaseInstancesClientDiagnostics, Pipeline, "SapDatabaseInstanceCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -244,12 +245,12 @@ namespace Azure.ResourceManager.Workloads
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="SapDatabaseInstanceResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="SapDatabaseInstanceResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<SapDatabaseInstanceResource> GetAll(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _sapDatabaseInstanceSapDatabaseInstancesRestClient.CreateListRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _sapDatabaseInstanceSapDatabaseInstancesRestClient.CreateListNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new SapDatabaseInstanceResource(Client, SapDatabaseInstanceData.DeserializeSapDatabaseInstanceData(e)), _sapDatabaseInstanceSapDatabaseInstancesClientDiagnostics, Pipeline, "SapDatabaseInstanceCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new SapDatabaseInstanceResource(Client, SapDatabaseInstanceData.DeserializeSapDatabaseInstanceData(e)), _sapDatabaseInstanceSapDatabaseInstancesClientDiagnostics, Pipeline, "SapDatabaseInstanceCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -314,6 +315,80 @@ namespace Azure.ResourceManager.Workloads
             {
                 var response = _sapDatabaseInstanceSapDatabaseInstancesRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, databaseInstanceName, cancellationToken: cancellationToken);
                 return Response.FromValue(response.Value != null, response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Workloads/sapVirtualInstances/{sapVirtualInstanceName}/databaseInstances/{databaseInstanceName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>SAPDatabaseInstances_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="databaseInstanceName"> Database resource name string modeled as parameter for auto generation to work correctly. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="databaseInstanceName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="databaseInstanceName"/> is null. </exception>
+        public virtual async Task<NullableResponse<SapDatabaseInstanceResource>> GetIfExistsAsync(string databaseInstanceName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(databaseInstanceName, nameof(databaseInstanceName));
+
+            using var scope = _sapDatabaseInstanceSapDatabaseInstancesClientDiagnostics.CreateScope("SapDatabaseInstanceCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = await _sapDatabaseInstanceSapDatabaseInstancesRestClient.GetAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, databaseInstanceName, cancellationToken: cancellationToken).ConfigureAwait(false);
+                if (response.Value == null)
+                    return new NoValueResponse<SapDatabaseInstanceResource>(response.GetRawResponse());
+                return Response.FromValue(new SapDatabaseInstanceResource(Client, response.Value), response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Workloads/sapVirtualInstances/{sapVirtualInstanceName}/databaseInstances/{databaseInstanceName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>SAPDatabaseInstances_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="databaseInstanceName"> Database resource name string modeled as parameter for auto generation to work correctly. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="databaseInstanceName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="databaseInstanceName"/> is null. </exception>
+        public virtual NullableResponse<SapDatabaseInstanceResource> GetIfExists(string databaseInstanceName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(databaseInstanceName, nameof(databaseInstanceName));
+
+            using var scope = _sapDatabaseInstanceSapDatabaseInstancesClientDiagnostics.CreateScope("SapDatabaseInstanceCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = _sapDatabaseInstanceSapDatabaseInstancesRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, databaseInstanceName, cancellationToken: cancellationToken);
+                if (response.Value == null)
+                    return new NoValueResponse<SapDatabaseInstanceResource>(response.GetRawResponse());
+                return Response.FromValue(new SapDatabaseInstanceResource(Client, response.Value), response.GetRawResponse());
             }
             catch (Exception e)
             {

@@ -9,6 +9,7 @@ using System;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -19,13 +20,17 @@ namespace Azure.ResourceManager.Media
 {
     /// <summary>
     /// A Class representing a MediaAsset along with the instance operations that can be performed on it.
-    /// If you have a <see cref="ResourceIdentifier" /> you can construct a <see cref="MediaAssetResource" />
-    /// from an instance of <see cref="ArmClient" /> using the GetMediaAssetResource method.
-    /// Otherwise you can get one from its parent resource <see cref="MediaServicesAccountResource" /> using the GetMediaAsset method.
+    /// If you have a <see cref="ResourceIdentifier"/> you can construct a <see cref="MediaAssetResource"/>
+    /// from an instance of <see cref="ArmClient"/> using the GetMediaAssetResource method.
+    /// Otherwise you can get one from its parent resource <see cref="MediaServicesAccountResource"/> using the GetMediaAsset method.
     /// </summary>
     public partial class MediaAssetResource : ArmResource
     {
         /// <summary> Generate the resource identifier of a <see cref="MediaAssetResource"/> instance. </summary>
+        /// <param name="subscriptionId"> The subscriptionId. </param>
+        /// <param name="resourceGroupName"> The resourceGroupName. </param>
+        /// <param name="accountName"> The accountName. </param>
+        /// <param name="assetName"> The assetName. </param>
         public static ResourceIdentifier CreateResourceIdentifier(string subscriptionId, string resourceGroupName, string accountName, string assetName)
         {
             var resourceId = $"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}";
@@ -36,12 +41,15 @@ namespace Azure.ResourceManager.Media
         private readonly AssetsRestOperations _mediaAssetAssetsRestClient;
         private readonly MediaAssetData _data;
 
+        /// <summary> Gets the resource type for the operations. </summary>
+        public static readonly ResourceType ResourceType = "Microsoft.Media/mediaServices/assets";
+
         /// <summary> Initializes a new instance of the <see cref="MediaAssetResource"/> class for mocking. </summary>
         protected MediaAssetResource()
         {
         }
 
-        /// <summary> Initializes a new instance of the <see cref = "MediaAssetResource"/> class. </summary>
+        /// <summary> Initializes a new instance of the <see cref="MediaAssetResource"/> class. </summary>
         /// <param name="client"> The client parameters to use in these operations. </param>
         /// <param name="data"> The resource that is the target of operations. </param>
         internal MediaAssetResource(ArmClient client, MediaAssetData data) : this(client, data.Id)
@@ -62,9 +70,6 @@ namespace Azure.ResourceManager.Media
 			ValidateResourceId(Id);
 #endif
         }
-
-        /// <summary> Gets the resource type for the operations. </summary>
-        public static readonly ResourceType ResourceType = "Microsoft.Media/mediaServices/assets";
 
         /// <summary> Gets whether or not the current instance has data. </summary>
         public virtual bool HasData { get; }
@@ -91,7 +96,7 @@ namespace Azure.ResourceManager.Media
         /// <returns> An object representing collection of MediaAssetFilterResources and their operations over a MediaAssetFilterResource. </returns>
         public virtual MediaAssetFilterCollection GetMediaAssetFilters()
         {
-            return GetCachedClient(Client => new MediaAssetFilterCollection(Client, Id));
+            return GetCachedClient(client => new MediaAssetFilterCollection(client, Id));
         }
 
         /// <summary>
@@ -109,8 +114,8 @@ namespace Azure.ResourceManager.Media
         /// </summary>
         /// <param name="filterName"> The Asset Filter name. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="filterName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="filterName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="filterName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<MediaAssetFilterResource>> GetMediaAssetFilterAsync(string filterName, CancellationToken cancellationToken = default)
         {
@@ -132,8 +137,8 @@ namespace Azure.ResourceManager.Media
         /// </summary>
         /// <param name="filterName"> The Asset Filter name. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="filterName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="filterName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="filterName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<MediaAssetFilterResource> GetMediaAssetFilter(string filterName, CancellationToken cancellationToken = default)
         {
@@ -144,7 +149,7 @@ namespace Azure.ResourceManager.Media
         /// <returns> An object representing collection of MediaAssetTrackResources and their operations over a MediaAssetTrackResource. </returns>
         public virtual MediaAssetTrackCollection GetMediaAssetTracks()
         {
-            return GetCachedClient(Client => new MediaAssetTrackCollection(Client, Id));
+            return GetCachedClient(client => new MediaAssetTrackCollection(client, Id));
         }
 
         /// <summary>
@@ -162,8 +167,8 @@ namespace Azure.ResourceManager.Media
         /// </summary>
         /// <param name="trackName"> The Asset Track name. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="trackName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="trackName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="trackName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<MediaAssetTrackResource>> GetMediaAssetTrackAsync(string trackName, CancellationToken cancellationToken = default)
         {
@@ -185,8 +190,8 @@ namespace Azure.ResourceManager.Media
         /// </summary>
         /// <param name="trackName"> The Asset Track name. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="trackName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="trackName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="trackName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<MediaAssetTrackResource> GetMediaAssetTrack(string trackName, CancellationToken cancellationToken = default)
         {
@@ -409,13 +414,13 @@ namespace Azure.ResourceManager.Media
         /// <param name="content"> The request parameters. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="content"/> is null. </exception>
-        /// <returns> An async collection of <see cref="Uri" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="Uri"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<Uri> GetStorageContainerUrisAsync(MediaAssetStorageContainerSasContent content, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(content, nameof(content));
 
             HttpMessage FirstPageRequest(int? pageSizeHint) => _mediaAssetAssetsRestClient.CreateListContainerSasRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, content);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, null, e => new Uri(e.GetString()), _mediaAssetAssetsClientDiagnostics, Pipeline, "MediaAssetResource.GetStorageContainerUris", "assetContainerSasUrls", null, cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, null, e => new Uri(e.GetString()), _mediaAssetAssetsClientDiagnostics, Pipeline, "MediaAssetResource.GetStorageContainerUris", "assetContainerSasUrls", null, cancellationToken);
         }
 
         /// <summary>
@@ -434,13 +439,13 @@ namespace Azure.ResourceManager.Media
         /// <param name="content"> The request parameters. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="content"/> is null. </exception>
-        /// <returns> A collection of <see cref="Uri" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="Uri"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<Uri> GetStorageContainerUris(MediaAssetStorageContainerSasContent content, CancellationToken cancellationToken = default)
         {
             Argument.AssertNotNull(content, nameof(content));
 
             HttpMessage FirstPageRequest(int? pageSizeHint) => _mediaAssetAssetsRestClient.CreateListContainerSasRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, content);
-            return PageableHelpers.CreatePageable(FirstPageRequest, null, e => new Uri(e.GetString()), _mediaAssetAssetsClientDiagnostics, Pipeline, "MediaAssetResource.GetStorageContainerUris", "assetContainerSasUrls", null, cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, null, e => new Uri(e.GetString()), _mediaAssetAssetsClientDiagnostics, Pipeline, "MediaAssetResource.GetStorageContainerUris", "assetContainerSasUrls", null, cancellationToken);
         }
 
         /// <summary>
@@ -517,11 +522,11 @@ namespace Azure.ResourceManager.Media
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="MediaAssetStreamingLocator" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="MediaAssetStreamingLocator"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<MediaAssetStreamingLocator> GetStreamingLocatorsAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _mediaAssetAssetsRestClient.CreateListStreamingLocatorsRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, null, MediaAssetStreamingLocator.DeserializeMediaAssetStreamingLocator, _mediaAssetAssetsClientDiagnostics, Pipeline, "MediaAssetResource.GetStreamingLocators", "streamingLocators", null, cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, null, MediaAssetStreamingLocator.DeserializeMediaAssetStreamingLocator, _mediaAssetAssetsClientDiagnostics, Pipeline, "MediaAssetResource.GetStreamingLocators", "streamingLocators", null, cancellationToken);
         }
 
         /// <summary>
@@ -538,11 +543,11 @@ namespace Azure.ResourceManager.Media
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="MediaAssetStreamingLocator" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="MediaAssetStreamingLocator"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<MediaAssetStreamingLocator> GetStreamingLocators(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _mediaAssetAssetsRestClient.CreateListStreamingLocatorsRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name);
-            return PageableHelpers.CreatePageable(FirstPageRequest, null, MediaAssetStreamingLocator.DeserializeMediaAssetStreamingLocator, _mediaAssetAssetsClientDiagnostics, Pipeline, "MediaAssetResource.GetStreamingLocators", "streamingLocators", null, cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, null, MediaAssetStreamingLocator.DeserializeMediaAssetStreamingLocator, _mediaAssetAssetsClientDiagnostics, Pipeline, "MediaAssetResource.GetStreamingLocators", "streamingLocators", null, cancellationToken);
         }
     }
 }

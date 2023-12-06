@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -21,13 +22,16 @@ namespace Azure.ResourceManager.ContainerRegistry
 {
     /// <summary>
     /// A Class representing a ContainerRegistry along with the instance operations that can be performed on it.
-    /// If you have a <see cref="ResourceIdentifier" /> you can construct a <see cref="ContainerRegistryResource" />
-    /// from an instance of <see cref="ArmClient" /> using the GetContainerRegistryResource method.
-    /// Otherwise you can get one from its parent resource <see cref="ResourceGroupResource" /> using the GetContainerRegistry method.
+    /// If you have a <see cref="ResourceIdentifier"/> you can construct a <see cref="ContainerRegistryResource"/>
+    /// from an instance of <see cref="ArmClient"/> using the GetContainerRegistryResource method.
+    /// Otherwise you can get one from its parent resource <see cref="ResourceGroupResource"/> using the GetContainerRegistry method.
     /// </summary>
     public partial class ContainerRegistryResource : ArmResource
     {
         /// <summary> Generate the resource identifier of a <see cref="ContainerRegistryResource"/> instance. </summary>
+        /// <param name="subscriptionId"> The subscriptionId. </param>
+        /// <param name="resourceGroupName"> The resourceGroupName. </param>
+        /// <param name="registryName"> The registryName. </param>
         public static ResourceIdentifier CreateResourceIdentifier(string subscriptionId, string resourceGroupName, string registryName)
         {
             var resourceId = $"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}";
@@ -42,12 +46,15 @@ namespace Azure.ResourceManager.ContainerRegistry
         private readonly BuildsRestOperations _buildsRestClient;
         private readonly ContainerRegistryData _data;
 
+        /// <summary> Gets the resource type for the operations. </summary>
+        public static readonly ResourceType ResourceType = "Microsoft.ContainerRegistry/registries";
+
         /// <summary> Initializes a new instance of the <see cref="ContainerRegistryResource"/> class for mocking. </summary>
         protected ContainerRegistryResource()
         {
         }
 
-        /// <summary> Initializes a new instance of the <see cref = "ContainerRegistryResource"/> class. </summary>
+        /// <summary> Initializes a new instance of the <see cref="ContainerRegistryResource"/> class. </summary>
         /// <param name="client"> The client parameters to use in these operations. </param>
         /// <param name="data"> The resource that is the target of operations. </param>
         internal ContainerRegistryResource(ArmClient client, ContainerRegistryData data) : this(client, data.Id)
@@ -72,9 +79,6 @@ namespace Azure.ResourceManager.ContainerRegistry
 			ValidateResourceId(Id);
 #endif
         }
-
-        /// <summary> Gets the resource type for the operations. </summary>
-        public static readonly ResourceType ResourceType = "Microsoft.ContainerRegistry/registries";
 
         /// <summary> Gets whether or not the current instance has data. </summary>
         public virtual bool HasData { get; }
@@ -101,7 +105,7 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// <returns> An object representing collection of ContainerRegistryPrivateLinkResources and their operations over a ContainerRegistryPrivateLinkResource. </returns>
         public virtual ContainerRegistryPrivateLinkResourceCollection GetContainerRegistryPrivateLinkResources()
         {
-            return GetCachedClient(Client => new ContainerRegistryPrivateLinkResourceCollection(Client, Id));
+            return GetCachedClient(client => new ContainerRegistryPrivateLinkResourceCollection(client, Id));
         }
 
         /// <summary>
@@ -119,8 +123,8 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// </summary>
         /// <param name="groupName"> The name of the private link resource. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="groupName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="groupName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="groupName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<ContainerRegistryPrivateLinkResource>> GetContainerRegistryPrivateLinkResourceAsync(string groupName, CancellationToken cancellationToken = default)
         {
@@ -142,8 +146,8 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// </summary>
         /// <param name="groupName"> The name of the private link resource. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="groupName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="groupName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="groupName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<ContainerRegistryPrivateLinkResource> GetContainerRegistryPrivateLinkResource(string groupName, CancellationToken cancellationToken = default)
         {
@@ -154,7 +158,7 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// <returns> An object representing collection of ContainerRegistryPrivateEndpointConnectionResources and their operations over a ContainerRegistryPrivateEndpointConnectionResource. </returns>
         public virtual ContainerRegistryPrivateEndpointConnectionCollection GetContainerRegistryPrivateEndpointConnections()
         {
-            return GetCachedClient(Client => new ContainerRegistryPrivateEndpointConnectionCollection(Client, Id));
+            return GetCachedClient(client => new ContainerRegistryPrivateEndpointConnectionCollection(client, Id));
         }
 
         /// <summary>
@@ -172,8 +176,8 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// </summary>
         /// <param name="privateEndpointConnectionName"> The name of the private endpoint connection. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="privateEndpointConnectionName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="privateEndpointConnectionName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="privateEndpointConnectionName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<ContainerRegistryPrivateEndpointConnectionResource>> GetContainerRegistryPrivateEndpointConnectionAsync(string privateEndpointConnectionName, CancellationToken cancellationToken = default)
         {
@@ -195,8 +199,8 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// </summary>
         /// <param name="privateEndpointConnectionName"> The name of the private endpoint connection. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="privateEndpointConnectionName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="privateEndpointConnectionName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="privateEndpointConnectionName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<ContainerRegistryPrivateEndpointConnectionResource> GetContainerRegistryPrivateEndpointConnection(string privateEndpointConnectionName, CancellationToken cancellationToken = default)
         {
@@ -207,7 +211,7 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// <returns> An object representing collection of ContainerRegistryReplicationResources and their operations over a ContainerRegistryReplicationResource. </returns>
         public virtual ContainerRegistryReplicationCollection GetContainerRegistryReplications()
         {
-            return GetCachedClient(Client => new ContainerRegistryReplicationCollection(Client, Id));
+            return GetCachedClient(client => new ContainerRegistryReplicationCollection(client, Id));
         }
 
         /// <summary>
@@ -225,8 +229,8 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// </summary>
         /// <param name="replicationName"> The name of the replication. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="replicationName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="replicationName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="replicationName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<ContainerRegistryReplicationResource>> GetContainerRegistryReplicationAsync(string replicationName, CancellationToken cancellationToken = default)
         {
@@ -248,8 +252,8 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// </summary>
         /// <param name="replicationName"> The name of the replication. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="replicationName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="replicationName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="replicationName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<ContainerRegistryReplicationResource> GetContainerRegistryReplication(string replicationName, CancellationToken cancellationToken = default)
         {
@@ -260,7 +264,7 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// <returns> An object representing collection of ScopeMapResources and their operations over a ScopeMapResource. </returns>
         public virtual ScopeMapCollection GetScopeMaps()
         {
-            return GetCachedClient(Client => new ScopeMapCollection(Client, Id));
+            return GetCachedClient(client => new ScopeMapCollection(client, Id));
         }
 
         /// <summary>
@@ -278,8 +282,8 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// </summary>
         /// <param name="scopeMapName"> The name of the scope map. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="scopeMapName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="scopeMapName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="scopeMapName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<ScopeMapResource>> GetScopeMapAsync(string scopeMapName, CancellationToken cancellationToken = default)
         {
@@ -301,8 +305,8 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// </summary>
         /// <param name="scopeMapName"> The name of the scope map. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="scopeMapName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="scopeMapName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="scopeMapName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<ScopeMapResource> GetScopeMap(string scopeMapName, CancellationToken cancellationToken = default)
         {
@@ -313,7 +317,7 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// <returns> An object representing collection of ContainerRegistryTokenResources and their operations over a ContainerRegistryTokenResource. </returns>
         public virtual ContainerRegistryTokenCollection GetContainerRegistryTokens()
         {
-            return GetCachedClient(Client => new ContainerRegistryTokenCollection(Client, Id));
+            return GetCachedClient(client => new ContainerRegistryTokenCollection(client, Id));
         }
 
         /// <summary>
@@ -331,8 +335,8 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// </summary>
         /// <param name="tokenName"> The name of the token. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="tokenName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="tokenName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="tokenName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<ContainerRegistryTokenResource>> GetContainerRegistryTokenAsync(string tokenName, CancellationToken cancellationToken = default)
         {
@@ -354,8 +358,8 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// </summary>
         /// <param name="tokenName"> The name of the token. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="tokenName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="tokenName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="tokenName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<ContainerRegistryTokenResource> GetContainerRegistryToken(string tokenName, CancellationToken cancellationToken = default)
         {
@@ -366,7 +370,7 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// <returns> An object representing collection of ContainerRegistryWebhookResources and their operations over a ContainerRegistryWebhookResource. </returns>
         public virtual ContainerRegistryWebhookCollection GetContainerRegistryWebhooks()
         {
-            return GetCachedClient(Client => new ContainerRegistryWebhookCollection(Client, Id));
+            return GetCachedClient(client => new ContainerRegistryWebhookCollection(client, Id));
         }
 
         /// <summary>
@@ -384,8 +388,8 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// </summary>
         /// <param name="webhookName"> The name of the webhook. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="webhookName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="webhookName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="webhookName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<ContainerRegistryWebhookResource>> GetContainerRegistryWebhookAsync(string webhookName, CancellationToken cancellationToken = default)
         {
@@ -407,8 +411,8 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// </summary>
         /// <param name="webhookName"> The name of the webhook. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="webhookName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="webhookName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="webhookName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<ContainerRegistryWebhookResource> GetContainerRegistryWebhook(string webhookName, CancellationToken cancellationToken = default)
         {
@@ -419,7 +423,7 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// <returns> An object representing collection of ContainerRegistryAgentPoolResources and their operations over a ContainerRegistryAgentPoolResource. </returns>
         public virtual ContainerRegistryAgentPoolCollection GetContainerRegistryAgentPools()
         {
-            return GetCachedClient(Client => new ContainerRegistryAgentPoolCollection(Client, Id));
+            return GetCachedClient(client => new ContainerRegistryAgentPoolCollection(client, Id));
         }
 
         /// <summary>
@@ -437,8 +441,8 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// </summary>
         /// <param name="agentPoolName"> The name of the agent pool. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="agentPoolName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="agentPoolName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="agentPoolName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<ContainerRegistryAgentPoolResource>> GetContainerRegistryAgentPoolAsync(string agentPoolName, CancellationToken cancellationToken = default)
         {
@@ -460,8 +464,8 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// </summary>
         /// <param name="agentPoolName"> The name of the agent pool. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="agentPoolName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="agentPoolName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="agentPoolName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<ContainerRegistryAgentPoolResource> GetContainerRegistryAgentPool(string agentPoolName, CancellationToken cancellationToken = default)
         {
@@ -472,7 +476,7 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// <returns> An object representing collection of ContainerRegistryRunResources and their operations over a ContainerRegistryRunResource. </returns>
         public virtual ContainerRegistryRunCollection GetContainerRegistryRuns()
         {
-            return GetCachedClient(Client => new ContainerRegistryRunCollection(Client, Id));
+            return GetCachedClient(client => new ContainerRegistryRunCollection(client, Id));
         }
 
         /// <summary>
@@ -490,8 +494,8 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// </summary>
         /// <param name="runId"> The run ID. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="runId"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="runId"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="runId"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<ContainerRegistryRunResource>> GetContainerRegistryRunAsync(string runId, CancellationToken cancellationToken = default)
         {
@@ -513,8 +517,8 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// </summary>
         /// <param name="runId"> The run ID. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="runId"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="runId"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="runId"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<ContainerRegistryRunResource> GetContainerRegistryRun(string runId, CancellationToken cancellationToken = default)
         {
@@ -525,7 +529,7 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// <returns> An object representing collection of ContainerRegistryTaskRunResources and their operations over a ContainerRegistryTaskRunResource. </returns>
         public virtual ContainerRegistryTaskRunCollection GetContainerRegistryTaskRuns()
         {
-            return GetCachedClient(Client => new ContainerRegistryTaskRunCollection(Client, Id));
+            return GetCachedClient(client => new ContainerRegistryTaskRunCollection(client, Id));
         }
 
         /// <summary>
@@ -543,8 +547,8 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// </summary>
         /// <param name="taskRunName"> The name of the task run. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="taskRunName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="taskRunName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="taskRunName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<ContainerRegistryTaskRunResource>> GetContainerRegistryTaskRunAsync(string taskRunName, CancellationToken cancellationToken = default)
         {
@@ -566,8 +570,8 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// </summary>
         /// <param name="taskRunName"> The name of the task run. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="taskRunName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="taskRunName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="taskRunName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<ContainerRegistryTaskRunResource> GetContainerRegistryTaskRun(string taskRunName, CancellationToken cancellationToken = default)
         {
@@ -578,7 +582,7 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// <returns> An object representing collection of ContainerRegistryTaskResources and their operations over a ContainerRegistryTaskResource. </returns>
         public virtual ContainerRegistryTaskCollection GetContainerRegistryTasks()
         {
-            return GetCachedClient(Client => new ContainerRegistryTaskCollection(Client, Id));
+            return GetCachedClient(client => new ContainerRegistryTaskCollection(client, Id));
         }
 
         /// <summary>
@@ -596,8 +600,8 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// </summary>
         /// <param name="taskName"> The name of the container registry task. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="taskName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="taskName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="taskName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<ContainerRegistryTaskResource>> GetContainerRegistryTaskAsync(string taskName, CancellationToken cancellationToken = default)
         {
@@ -619,8 +623,8 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// </summary>
         /// <param name="taskName"> The name of the container registry task. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="taskName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="taskName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="taskName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<ContainerRegistryTaskResource> GetContainerRegistryTask(string taskName, CancellationToken cancellationToken = default)
         {
@@ -925,11 +929,11 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="ContainerRegistryUsage" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="ContainerRegistryUsage"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<ContainerRegistryUsage> GetUsagesAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _containerRegistryRegistriesRestClient.CreateListUsagesRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, null, ContainerRegistryUsage.DeserializeContainerRegistryUsage, _containerRegistryRegistriesClientDiagnostics, Pipeline, "ContainerRegistryResource.GetUsages", "value", null, cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, null, ContainerRegistryUsage.DeserializeContainerRegistryUsage, _containerRegistryRegistriesClientDiagnostics, Pipeline, "ContainerRegistryResource.GetUsages", "value", null, cancellationToken);
         }
 
         /// <summary>
@@ -946,11 +950,11 @@ namespace Azure.ResourceManager.ContainerRegistry
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="ContainerRegistryUsage" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="ContainerRegistryUsage"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<ContainerRegistryUsage> GetUsages(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _containerRegistryRegistriesRestClient.CreateListUsagesRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreatePageable(FirstPageRequest, null, ContainerRegistryUsage.DeserializeContainerRegistryUsage, _containerRegistryRegistriesClientDiagnostics, Pipeline, "ContainerRegistryResource.GetUsages", "value", null, cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, null, ContainerRegistryUsage.DeserializeContainerRegistryUsage, _containerRegistryRegistriesClientDiagnostics, Pipeline, "ContainerRegistryResource.GetUsages", "value", null, cancellationToken);
         }
 
         /// <summary>

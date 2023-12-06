@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -19,9 +20,9 @@ using Azure.ResourceManager;
 namespace Azure.ResourceManager.DataFactory
 {
     /// <summary>
-    /// A class representing a collection of <see cref="DataFactoryLinkedServiceResource" /> and their operations.
-    /// Each <see cref="DataFactoryLinkedServiceResource" /> in the collection will belong to the same instance of <see cref="DataFactoryResource" />.
-    /// To get a <see cref="DataFactoryLinkedServiceCollection" /> instance call the GetDataFactoryLinkedServices method from an instance of <see cref="DataFactoryResource" />.
+    /// A class representing a collection of <see cref="DataFactoryLinkedServiceResource"/> and their operations.
+    /// Each <see cref="DataFactoryLinkedServiceResource"/> in the collection will belong to the same instance of <see cref="DataFactoryResource"/>.
+    /// To get a <see cref="DataFactoryLinkedServiceCollection"/> instance call the GetDataFactoryLinkedServices method from an instance of <see cref="DataFactoryResource"/>.
     /// </summary>
     public partial class DataFactoryLinkedServiceCollection : ArmCollection, IEnumerable<DataFactoryLinkedServiceResource>, IAsyncEnumerable<DataFactoryLinkedServiceResource>
     {
@@ -226,12 +227,12 @@ namespace Azure.ResourceManager.DataFactory
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="DataFactoryLinkedServiceResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="DataFactoryLinkedServiceResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<DataFactoryLinkedServiceResource> GetAllAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _dataFactoryLinkedServiceLinkedServicesRestClient.CreateListByFactoryRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _dataFactoryLinkedServiceLinkedServicesRestClient.CreateListByFactoryNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new DataFactoryLinkedServiceResource(Client, DataFactoryLinkedServiceData.DeserializeDataFactoryLinkedServiceData(e)), _dataFactoryLinkedServiceLinkedServicesClientDiagnostics, Pipeline, "DataFactoryLinkedServiceCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new DataFactoryLinkedServiceResource(Client, DataFactoryLinkedServiceData.DeserializeDataFactoryLinkedServiceData(e)), _dataFactoryLinkedServiceLinkedServicesClientDiagnostics, Pipeline, "DataFactoryLinkedServiceCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -248,12 +249,12 @@ namespace Azure.ResourceManager.DataFactory
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="DataFactoryLinkedServiceResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="DataFactoryLinkedServiceResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<DataFactoryLinkedServiceResource> GetAll(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _dataFactoryLinkedServiceLinkedServicesRestClient.CreateListByFactoryRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _dataFactoryLinkedServiceLinkedServicesRestClient.CreateListByFactoryNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new DataFactoryLinkedServiceResource(Client, DataFactoryLinkedServiceData.DeserializeDataFactoryLinkedServiceData(e)), _dataFactoryLinkedServiceLinkedServicesClientDiagnostics, Pipeline, "DataFactoryLinkedServiceCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new DataFactoryLinkedServiceResource(Client, DataFactoryLinkedServiceData.DeserializeDataFactoryLinkedServiceData(e)), _dataFactoryLinkedServiceLinkedServicesClientDiagnostics, Pipeline, "DataFactoryLinkedServiceCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -320,6 +321,82 @@ namespace Azure.ResourceManager.DataFactory
             {
                 var response = _dataFactoryLinkedServiceLinkedServicesRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, linkedServiceName, ifNoneMatch, cancellationToken: cancellationToken);
                 return Response.FromValue(response.Value != null, response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataFactory/factories/{factoryName}/linkedservices/{linkedServiceName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>LinkedServices_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="linkedServiceName"> The linked service name. </param>
+        /// <param name="ifNoneMatch"> ETag of the linked service entity. Should only be specified for get. If the ETag matches the existing entity tag, or if * was provided, then no content will be returned. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="linkedServiceName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="linkedServiceName"/> is null. </exception>
+        public virtual async Task<NullableResponse<DataFactoryLinkedServiceResource>> GetIfExistsAsync(string linkedServiceName, string ifNoneMatch = null, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(linkedServiceName, nameof(linkedServiceName));
+
+            using var scope = _dataFactoryLinkedServiceLinkedServicesClientDiagnostics.CreateScope("DataFactoryLinkedServiceCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = await _dataFactoryLinkedServiceLinkedServicesRestClient.GetAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, linkedServiceName, ifNoneMatch, cancellationToken: cancellationToken).ConfigureAwait(false);
+                if (response.Value == null)
+                    return new NoValueResponse<DataFactoryLinkedServiceResource>(response.GetRawResponse());
+                return Response.FromValue(new DataFactoryLinkedServiceResource(Client, response.Value), response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataFactory/factories/{factoryName}/linkedservices/{linkedServiceName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>LinkedServices_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="linkedServiceName"> The linked service name. </param>
+        /// <param name="ifNoneMatch"> ETag of the linked service entity. Should only be specified for get. If the ETag matches the existing entity tag, or if * was provided, then no content will be returned. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="linkedServiceName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="linkedServiceName"/> is null. </exception>
+        public virtual NullableResponse<DataFactoryLinkedServiceResource> GetIfExists(string linkedServiceName, string ifNoneMatch = null, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(linkedServiceName, nameof(linkedServiceName));
+
+            using var scope = _dataFactoryLinkedServiceLinkedServicesClientDiagnostics.CreateScope("DataFactoryLinkedServiceCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = _dataFactoryLinkedServiceLinkedServicesRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, linkedServiceName, ifNoneMatch, cancellationToken: cancellationToken);
+                if (response.Value == null)
+                    return new NoValueResponse<DataFactoryLinkedServiceResource>(response.GetRawResponse());
+                return Response.FromValue(new DataFactoryLinkedServiceResource(Client, response.Value), response.GetRawResponse());
             }
             catch (Exception e)
             {

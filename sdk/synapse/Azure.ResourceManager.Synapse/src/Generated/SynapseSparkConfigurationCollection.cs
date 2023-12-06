@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -19,9 +20,9 @@ using Azure.ResourceManager;
 namespace Azure.ResourceManager.Synapse
 {
     /// <summary>
-    /// A class representing a collection of <see cref="SynapseSparkConfigurationResource" /> and their operations.
-    /// Each <see cref="SynapseSparkConfigurationResource" /> in the collection will belong to the same instance of <see cref="SynapseWorkspaceResource" />.
-    /// To get a <see cref="SynapseSparkConfigurationCollection" /> instance call the GetSynapseSparkConfigurations method from an instance of <see cref="SynapseWorkspaceResource" />.
+    /// A class representing a collection of <see cref="SynapseSparkConfigurationResource"/> and their operations.
+    /// Each <see cref="SynapseSparkConfigurationResource"/> in the collection will belong to the same instance of <see cref="SynapseWorkspaceResource"/>.
+    /// To get a <see cref="SynapseSparkConfigurationCollection"/> instance call the GetSynapseSparkConfigurations method from an instance of <see cref="SynapseWorkspaceResource"/>.
     /// </summary>
     public partial class SynapseSparkConfigurationCollection : ArmCollection, IEnumerable<SynapseSparkConfigurationResource>, IAsyncEnumerable<SynapseSparkConfigurationResource>
     {
@@ -145,12 +146,12 @@ namespace Azure.ResourceManager.Synapse
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="SynapseSparkConfigurationResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="SynapseSparkConfigurationResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<SynapseSparkConfigurationResource> GetAllAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _synapseSparkConfigurationSparkConfigurationsRestClient.CreateListByWorkspaceRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _synapseSparkConfigurationSparkConfigurationsRestClient.CreateListByWorkspaceNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new SynapseSparkConfigurationResource(Client, SynapseSparkConfigurationData.DeserializeSynapseSparkConfigurationData(e)), _synapseSparkConfigurationSparkConfigurationsClientDiagnostics, Pipeline, "SynapseSparkConfigurationCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new SynapseSparkConfigurationResource(Client, SynapseSparkConfigurationData.DeserializeSynapseSparkConfigurationData(e)), _synapseSparkConfigurationSparkConfigurationsClientDiagnostics, Pipeline, "SynapseSparkConfigurationCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -167,12 +168,12 @@ namespace Azure.ResourceManager.Synapse
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="SynapseSparkConfigurationResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="SynapseSparkConfigurationResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<SynapseSparkConfigurationResource> GetAll(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _synapseSparkConfigurationSparkConfigurationsRestClient.CreateListByWorkspaceRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _synapseSparkConfigurationSparkConfigurationsRestClient.CreateListByWorkspaceNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new SynapseSparkConfigurationResource(Client, SynapseSparkConfigurationData.DeserializeSynapseSparkConfigurationData(e)), _synapseSparkConfigurationSparkConfigurationsClientDiagnostics, Pipeline, "SynapseSparkConfigurationCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new SynapseSparkConfigurationResource(Client, SynapseSparkConfigurationData.DeserializeSynapseSparkConfigurationData(e)), _synapseSparkConfigurationSparkConfigurationsClientDiagnostics, Pipeline, "SynapseSparkConfigurationCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -237,6 +238,80 @@ namespace Azure.ResourceManager.Synapse
             {
                 var response = _synapseSparkConfigurationSparkConfigurationRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, sparkConfigurationName, cancellationToken: cancellationToken);
                 return Response.FromValue(response.Value != null, response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Synapse/workspaces/{workspaceName}/sparkconfigurations/{sparkConfigurationName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>SparkConfiguration_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="sparkConfigurationName"> SparkConfiguration name. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="sparkConfigurationName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="sparkConfigurationName"/> is null. </exception>
+        public virtual async Task<NullableResponse<SynapseSparkConfigurationResource>> GetIfExistsAsync(string sparkConfigurationName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(sparkConfigurationName, nameof(sparkConfigurationName));
+
+            using var scope = _synapseSparkConfigurationSparkConfigurationClientDiagnostics.CreateScope("SynapseSparkConfigurationCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = await _synapseSparkConfigurationSparkConfigurationRestClient.GetAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, sparkConfigurationName, cancellationToken: cancellationToken).ConfigureAwait(false);
+                if (response.Value == null)
+                    return new NoValueResponse<SynapseSparkConfigurationResource>(response.GetRawResponse());
+                return Response.FromValue(new SynapseSparkConfigurationResource(Client, response.Value), response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Synapse/workspaces/{workspaceName}/sparkconfigurations/{sparkConfigurationName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>SparkConfiguration_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="sparkConfigurationName"> SparkConfiguration name. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="sparkConfigurationName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="sparkConfigurationName"/> is null. </exception>
+        public virtual NullableResponse<SynapseSparkConfigurationResource> GetIfExists(string sparkConfigurationName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(sparkConfigurationName, nameof(sparkConfigurationName));
+
+            using var scope = _synapseSparkConfigurationSparkConfigurationClientDiagnostics.CreateScope("SynapseSparkConfigurationCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = _synapseSparkConfigurationSparkConfigurationRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, sparkConfigurationName, cancellationToken: cancellationToken);
+                if (response.Value == null)
+                    return new NoValueResponse<SynapseSparkConfigurationResource>(response.GetRawResponse());
+                return Response.FromValue(new SynapseSparkConfigurationResource(Client, response.Value), response.GetRawResponse());
             }
             catch (Exception e)
             {

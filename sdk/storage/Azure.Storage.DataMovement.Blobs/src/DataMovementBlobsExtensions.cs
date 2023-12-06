@@ -1,10 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Threading.Tasks;
-using System.Threading;
 using Azure.Storage.Blobs.Models;
-using Azure.Storage.DataMovement.JobPlan;
+using System.IO;
 
 namespace Azure.Storage.DataMovement.Blobs
 {
@@ -62,9 +60,9 @@ namespace Azure.Storage.DataMovement.Blobs
                 lastAccessed: blobProperties.LastAccessed);
         }
 
-        internal static ReadStreamStorageResourceResult ToReadStreamStorageResourceInfo(this BlobDownloadStreamingResult result)
+        internal static StorageResourceReadStreamResult ToReadStreamStorageResourceInfo(this BlobDownloadStreamingResult result)
         {
-            return new ReadStreamStorageResourceResult(
+            return new StorageResourceReadStreamResult(
                 content: result.Content,
                 contentRange: result.Details.ContentRange,
                 acceptRanges: result.Details.AcceptRanges,
@@ -131,7 +129,7 @@ namespace Azure.Storage.DataMovement.Blobs
         internal static AppendBlobStorageResourceOptions ToAppendBlobStorageResourceOptions(
             this BlobStorageResourceContainerOptions options)
         {
-            return new AppendBlobStorageResourceOptions(options?.ResourceOptions);
+            return new AppendBlobStorageResourceOptions(options?.BlobOptions);
         }
 
         internal static BlobDownloadOptions ToBlobDownloadOptions(
@@ -143,7 +141,6 @@ namespace Azure.Storage.DataMovement.Blobs
             {
                 Range = range,
                 Conditions = CreateRequestConditions(options?.SourceConditions, true),
-                TransferValidation = options?.DownloadTransferValidationOptions,
             };
 
             result.Conditions.IfMatch ??= etag;
@@ -168,8 +165,6 @@ namespace Azure.Storage.DataMovement.Blobs
                     TagConditions = options?.DestinationConditions?.TagConditions,
                     LeaseId = options?.DestinationConditions?.LeaseId,
                 },
-                ImmutabilityPolicy = options?.DestinationImmutabilityPolicy,
-                HasLegalHold = options?.LegalHold,
             };
         }
 
@@ -180,7 +175,6 @@ namespace Azure.Storage.DataMovement.Blobs
             return new AppendBlobAppendBlockOptions()
             {
                 Conditions = CreateRequestConditions(options?.DestinationConditions, overwrite),
-                TransferValidation = options?.UploadTransferValidationOptions,
             };
         }
 
@@ -211,7 +205,7 @@ namespace Azure.Storage.DataMovement.Blobs
         internal static BlockBlobStorageResourceOptions ToBlockBlobStorageResourceOptions(
             this BlobStorageResourceContainerOptions options)
         {
-            return new BlockBlobStorageResourceOptions(options?.ResourceOptions);
+            return new BlockBlobStorageResourceOptions(options?.BlobOptions);
         }
 
         internal static BlobDownloadOptions ToBlobDownloadOptions(
@@ -223,7 +217,6 @@ namespace Azure.Storage.DataMovement.Blobs
             {
                 Range = range,
                 Conditions = CreateRequestConditions(options?.SourceConditions),
-                TransferValidation = options?.DownloadTransferValidationOptions,
             };
             result.Conditions.IfMatch ??= etag;
             return result;
@@ -237,14 +230,11 @@ namespace Azure.Storage.DataMovement.Blobs
                 Metadata = options?.Metadata,
                 Tags = options?.Tags,
                 AccessTier = options?.AccessTier,
-                ImmutabilityPolicy = options?.DestinationImmutabilityPolicy,
-                LegalHold = options?.LegalHold,
                 TransferOptions = new StorageTransferOptions()
                 {
                     InitialTransferSize = initialSize,
                 },
                 Conditions = CreateRequestConditions(options?.DestinationConditions, overwrite),
-                TransferValidation = options?.UploadTransferValidationOptions,
             };
         }
 
@@ -261,7 +251,6 @@ namespace Azure.Storage.DataMovement.Blobs
                     LeaseId = options?.DestinationConditions?.LeaseId,
                     TagConditions = options?.DestinationConditions?.TagConditions,
                 },
-                TransferValidation = options?.UploadTransferValidationOptions,
             };
         }
 
@@ -325,8 +314,6 @@ namespace Azure.Storage.DataMovement.Blobs
                 Metadata = options?.Metadata,
                 Tags = options?.Tags,
                 AccessTier = options?.AccessTier,
-                ImmutabilityPolicy = options?.DestinationImmutabilityPolicy,
-                LegalHold = options?.LegalHold,
                 Conditions = CreateRequestConditions(options?.DestinationConditions, overwrite)
             };
         }
@@ -334,7 +321,7 @@ namespace Azure.Storage.DataMovement.Blobs
         internal static PageBlobStorageResourceOptions ToPageBlobStorageResourceOptions(
             this BlobStorageResourceContainerOptions options)
         {
-            return new PageBlobStorageResourceOptions(options?.ResourceOptions);
+            return new PageBlobStorageResourceOptions(options?.BlobOptions);
         }
 
         internal static BlobDownloadOptions ToBlobDownloadOptions(
@@ -346,7 +333,6 @@ namespace Azure.Storage.DataMovement.Blobs
             {
                 Range = range,
                 Conditions = CreateRequestConditions(options?.SourceConditions, true),
-                TransferValidation = options?.DownloadTransferValidationOptions,
             };
             result.Conditions.IfMatch ??= etag;
             return result;
@@ -371,8 +357,6 @@ namespace Azure.Storage.DataMovement.Blobs
                     TagConditions = options?.DestinationConditions?.TagConditions,
                     LeaseId = options?.DestinationConditions?.LeaseId,
                 },
-                ImmutabilityPolicy = options?.DestinationImmutabilityPolicy,
-                LegalHold = options?.LegalHold,
             };
         }
 
@@ -383,7 +367,6 @@ namespace Azure.Storage.DataMovement.Blobs
             return new PageBlobUploadPagesOptions()
             {
                 Conditions = CreateRequestConditions(options?.DestinationConditions, overwrite),
-                TransferValidation = options?.UploadTransferValidationOptions,
             };
         }
 
@@ -406,179 +389,82 @@ namespace Azure.Storage.DataMovement.Blobs
             };
         }
 
-        internal static async Task<BlockBlobStorageResourceOptions> GetBlockBlobResourceOptionsAsync(
-            this TransferCheckpointer checkpointer,
-            string transferId,
-            bool isSource,
-            CancellationToken cancellationToken)
+        internal static BlobCheckpointData GetCheckpointData(this DataTransferProperties properties, bool isSource)
         {
-            BlobStorageResourceOptions baseOptions = await checkpointer.GetBlobResourceOptionsAsync(
-                transferId,
-                isSource,
-                cancellationToken).ConfigureAwait(false);
-            BlockBlobStorageResourceOptions options = new(baseOptions);
-
-            // Get AccessTier
-            if (!isSource)
+            if (isSource)
             {
-                int startIndex = DataMovementConstants.PlanFile.DstBlobBlockBlobTierIndex;
-                JobPartPlanBlockBlobTier accessTier = (JobPartPlanBlockBlobTier)await checkpointer.GetByteValue(
-                    transferId,
-                    startIndex,
-                    cancellationToken: cancellationToken).ConfigureAwait(false);
-                options.AccessTier = accessTier.ToAccessTier();
+                using (MemoryStream stream = new(properties.SourceCheckpointData))
+                {
+                    return BlobSourceCheckpointData.Deserialize(stream);
+                }
             }
-            return options;
+            else
+            {
+                using (MemoryStream stream = new(properties.DestinationCheckpointData))
+                {
+                    return BlobDestinationCheckpointData.Deserialize(stream);
+                }
+            }
         }
 
-        internal static async Task<PageBlobStorageResourceOptions> GetPageBlobResourceOptionsAsync(
-            this TransferCheckpointer checkpointer,
-            string transferId,
-            bool isSource,
-            CancellationToken cancellationToken)
+        internal static BlobStorageResourceOptions GetBlobResourceOptions(
+            this BlobDestinationCheckpointData checkpointData)
         {
-            BlobStorageResourceOptions baseOptions = await checkpointer.GetBlobResourceOptionsAsync(
-                transferId,
-                isSource,
-                cancellationToken).ConfigureAwait(false);
-            PageBlobStorageResourceOptions options = new(baseOptions);
-
-            if (!isSource)
+            return new()
             {
-                // Get AccessTier
-                int startIndex = DataMovementConstants.PlanFile.DstBlobPageBlobTierIndex;
-                JobPartPlanPageBlobTier accessTier = (JobPartPlanPageBlobTier)await checkpointer.GetByteValue(
-                    transferId,
-                    startIndex,
-                    cancellationToken: cancellationToken).ConfigureAwait(false);
-                options.AccessTier = accessTier.ToAccessTier();
-            }
-            return options;
-        }
-
-        internal static async Task<BlobStorageResourceOptions> GetBlobResourceOptionsAsync(
-            this TransferCheckpointer checkpointer,
-            string transferId,
-            bool isSource,
-            CancellationToken cancellationToken)
-        {
-            BlobStorageResourceOptions options = new BlobStorageResourceOptions();
-
-            // TODO: parse out the rest of the parameters from the Job Part Plan File
-
-            if (!isSource)
-            {
-                // Get Metadata
-                int metadataIndex = DataMovementConstants.PlanFile.DstBlobMetadataLengthIndex;
-                int metadataReadLength = DataMovementConstants.PlanFile.DstBlobTagsLengthIndex - metadataIndex;
-                string metadata = await checkpointer.GetHeaderUShortValue(
-                    transferId,
-                    metadataIndex,
-                    metadataReadLength,
-                    DataMovementConstants.PlanFile.MetadataStrNumBytes,
-                    cancellationToken).ConfigureAwait(false);
-                options.Metadata = metadata.ToDictionary(nameof(metadata));
-
-                // Get blob tags
-                int tagsIndex = DataMovementConstants.PlanFile.DstBlobTagsLengthIndex;
-                int tagsReadLength = DataMovementConstants.PlanFile.DstBlobIsSourceEncrypted - tagsIndex;
-                string tags = await checkpointer.GetHeaderLongValue(
-                    transferId,
-                    tagsIndex,
-                    tagsReadLength,
-                    DataMovementConstants.PlanFile.BlobTagsStrNumBytes,
-                    cancellationToken).ConfigureAwait(false);
-                options.Tags = tags.ToDictionary(nameof(tags));
-            }
-            return options;
-        }
-
-        internal static async Task<BlobStorageResourceContainerOptions> GetBlobContainerOptionsAsync(
-            this TransferCheckpointer checkpointer,
-            string directoryPrefix,
-            string transferId,
-            bool isSource,
-            CancellationToken cancellationToken)
-        {
-            BlobStorageResourceOptions baseOptions = await checkpointer.GetBlobResourceOptionsAsync(
-                transferId,
-                isSource,
-                cancellationToken).ConfigureAwait(false);
-            BlobStorageResourceContainerOptions options = new()
-            {
-                DirectoryPrefix = directoryPrefix,
-                ResourceOptions = baseOptions,
+                Metadata = checkpointData.Metadata,
+                Tags = checkpointData.Tags,
+                HttpHeaders = checkpointData.ContentHeaders,
+                AccessTier = checkpointData.AccessTier,
             };
-
-            return options;
         }
 
-        private static AccessTier ToAccessTier(this JobPartPlanBlockBlobTier tier)
+        internal static BlockBlobStorageResourceOptions GetBlockBlobResourceOptions(
+            this BlobDestinationCheckpointData checkpointData)
         {
-            if (JobPartPlanBlockBlobTier.Archive == tier)
-            {
-                return AccessTier.Archive;
-            }
-            else if (JobPartPlanBlockBlobTier.Cool == tier)
-            {
-                return AccessTier.Cool;
-            }
-            else if (JobPartPlanBlockBlobTier.Cold == tier)
-            {
-                return AccessTier.Cold;
-            }
-            else // including JobPartPlanBlockBlobTier.Hot == tier
-            {
-                return AccessTier.Hot;
-            }
+            BlobStorageResourceOptions baseOptions = checkpointData.GetBlobResourceOptions();
+            return new BlockBlobStorageResourceOptions(baseOptions);
         }
 
-        private static AccessTier ToAccessTier(this JobPartPlanPageBlobTier tier)
+        internal static PageBlobStorageResourceOptions GetPageBlobResourceOptions(
+            this BlobDestinationCheckpointData checkpointData)
         {
-            if (JobPartPlanPageBlobTier.P4 == tier)
-            {
-                return AccessTier.P4;
-            }
-            else if (JobPartPlanPageBlobTier.P6 == tier)
-            {
-                return AccessTier.P6;
-            }
-            else if (JobPartPlanPageBlobTier.P10 == tier)
-            {
-                return AccessTier.P10;
-            }
-            else if (JobPartPlanPageBlobTier.P15 == tier)
-            {
-                return AccessTier.P15;
-            }
-            else if (JobPartPlanPageBlobTier.P20 == tier)
-            {
-                return AccessTier.P20;
-            }
-            else if (JobPartPlanPageBlobTier.P30 == tier)
-            {
-                return AccessTier.P30;
-            }
-            else if (JobPartPlanPageBlobTier.P40 == tier)
-            {
-                return AccessTier.P40;
-            }
-            else if (JobPartPlanPageBlobTier.P50 == tier)
-            {
-                return AccessTier.P50;
-            }
-            else if (JobPartPlanPageBlobTier.P60 == tier)
-            {
-                return AccessTier.P60;
-            }
-            else if (JobPartPlanPageBlobTier.P70 == tier)
-            {
-                return AccessTier.P70;
-            }
-            else // including JobPartPlanPageBlobTier.P80 == tier
-            {
-                return AccessTier.P80;
-            }
+            BlobStorageResourceOptions baseOptions = checkpointData.GetBlobResourceOptions();
+            return new PageBlobStorageResourceOptions(baseOptions);
         }
+
+        internal static AppendBlobStorageResourceOptions GetAppendBlobResourceOptions(
+            this BlobDestinationCheckpointData checkpointData)
+        {
+            BlobStorageResourceOptions baseOptions = checkpointData.GetBlobResourceOptions();
+            return new AppendBlobStorageResourceOptions(baseOptions);
+        }
+
+        internal static BlobStorageResourceContainerOptions GetBlobContainerOptions(
+            this BlobDestinationCheckpointData checkpointData,
+            string directoryPrefix)
+        {
+            BlobStorageResourceOptions baseOptions = checkpointData.GetBlobResourceOptions();
+            return new BlobStorageResourceContainerOptions()
+            {
+                BlobType = checkpointData.BlobType,
+                BlobDirectoryPrefix = directoryPrefix,
+                BlobOptions = baseOptions,
+            };
+        }
+
+        internal static BlobStorageResourceContainerOptions DeepCopy(this BlobStorageResourceContainerOptions options)
+            => new BlobStorageResourceContainerOptions()
+            {
+                BlobType = options?.BlobType ?? BlobType.Block,
+                BlobDirectoryPrefix = options?.BlobDirectoryPrefix,
+                BlobOptions = new BlobStorageResourceOptions()
+                {
+                    Metadata = options?.BlobOptions?.Metadata,
+                    Tags = options?.BlobOptions?.Tags,
+                    HttpHeaders = options?.BlobOptions?.HttpHeaders,
+                    AccessTier = options?.BlobOptions?.AccessTier,
+                }
+            };
     }
 }

@@ -9,6 +9,7 @@ using System;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -19,13 +20,17 @@ namespace Azure.ResourceManager.Automation
 {
     /// <summary>
     /// A Class representing an AutomationSourceControl along with the instance operations that can be performed on it.
-    /// If you have a <see cref="ResourceIdentifier" /> you can construct an <see cref="AutomationSourceControlResource" />
-    /// from an instance of <see cref="ArmClient" /> using the GetAutomationSourceControlResource method.
-    /// Otherwise you can get one from its parent resource <see cref="AutomationAccountResource" /> using the GetAutomationSourceControl method.
+    /// If you have a <see cref="ResourceIdentifier"/> you can construct an <see cref="AutomationSourceControlResource"/>
+    /// from an instance of <see cref="ArmClient"/> using the GetAutomationSourceControlResource method.
+    /// Otherwise you can get one from its parent resource <see cref="AutomationAccountResource"/> using the GetAutomationSourceControl method.
     /// </summary>
     public partial class AutomationSourceControlResource : ArmResource
     {
         /// <summary> Generate the resource identifier of a <see cref="AutomationSourceControlResource"/> instance. </summary>
+        /// <param name="subscriptionId"> The subscriptionId. </param>
+        /// <param name="resourceGroupName"> The resourceGroupName. </param>
+        /// <param name="automationAccountName"> The automationAccountName. </param>
+        /// <param name="sourceControlName"> The sourceControlName. </param>
         public static ResourceIdentifier CreateResourceIdentifier(string subscriptionId, string resourceGroupName, string automationAccountName, string sourceControlName)
         {
             var resourceId = $"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Automation/automationAccounts/{automationAccountName}/sourceControls/{sourceControlName}";
@@ -40,12 +45,15 @@ namespace Azure.ResourceManager.Automation
         private readonly SourceControlSyncJobStreamsRestOperations _sourceControlSyncJobStreamsRestClient;
         private readonly AutomationSourceControlData _data;
 
+        /// <summary> Gets the resource type for the operations. </summary>
+        public static readonly ResourceType ResourceType = "Microsoft.Automation/automationAccounts/sourceControls";
+
         /// <summary> Initializes a new instance of the <see cref="AutomationSourceControlResource"/> class for mocking. </summary>
         protected AutomationSourceControlResource()
         {
         }
 
-        /// <summary> Initializes a new instance of the <see cref = "AutomationSourceControlResource"/> class. </summary>
+        /// <summary> Initializes a new instance of the <see cref="AutomationSourceControlResource"/> class. </summary>
         /// <param name="client"> The client parameters to use in these operations. </param>
         /// <param name="data"> The resource that is the target of operations. </param>
         internal AutomationSourceControlResource(ArmClient client, AutomationSourceControlData data) : this(client, data.Id)
@@ -70,9 +78,6 @@ namespace Azure.ResourceManager.Automation
 			ValidateResourceId(Id);
 #endif
         }
-
-        /// <summary> Gets the resource type for the operations. </summary>
-        public static readonly ResourceType ResourceType = "Microsoft.Automation/automationAccounts/sourceControls";
 
         /// <summary> Gets whether or not the current instance has data. </summary>
         public virtual bool HasData { get; }
@@ -442,12 +447,12 @@ namespace Azure.ResourceManager.Automation
         /// </summary>
         /// <param name="filter"> The filter to apply on the operation. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="SourceControlSyncJob" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="SourceControlSyncJob"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<SourceControlSyncJob> GetSourceControlSyncJobsAsync(string filter = null, CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _sourceControlSyncJobRestClient.CreateListByAutomationAccountRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, filter);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _sourceControlSyncJobRestClient.CreateListByAutomationAccountNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, filter);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, SourceControlSyncJob.DeserializeSourceControlSyncJob, _sourceControlSyncJobClientDiagnostics, Pipeline, "AutomationSourceControlResource.GetSourceControlSyncJobs", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, SourceControlSyncJob.DeserializeSourceControlSyncJob, _sourceControlSyncJobClientDiagnostics, Pipeline, "AutomationSourceControlResource.GetSourceControlSyncJobs", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -465,12 +470,12 @@ namespace Azure.ResourceManager.Automation
         /// </summary>
         /// <param name="filter"> The filter to apply on the operation. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="SourceControlSyncJob" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="SourceControlSyncJob"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<SourceControlSyncJob> GetSourceControlSyncJobs(string filter = null, CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _sourceControlSyncJobRestClient.CreateListByAutomationAccountRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, filter);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _sourceControlSyncJobRestClient.CreateListByAutomationAccountNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, filter);
-            return PageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, SourceControlSyncJob.DeserializeSourceControlSyncJob, _sourceControlSyncJobClientDiagnostics, Pipeline, "AutomationSourceControlResource.GetSourceControlSyncJobs", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, SourceControlSyncJob.DeserializeSourceControlSyncJob, _sourceControlSyncJobClientDiagnostics, Pipeline, "AutomationSourceControlResource.GetSourceControlSyncJobs", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -489,12 +494,12 @@ namespace Azure.ResourceManager.Automation
         /// <param name="sourceControlSyncJobId"> The source control sync job id. </param>
         /// <param name="filter"> The filter to apply on the operation. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="SourceControlSyncJobStream" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="SourceControlSyncJobStream"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<SourceControlSyncJobStream> GetSourceControlSyncJobStreamsAsync(Guid sourceControlSyncJobId, string filter = null, CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _sourceControlSyncJobStreamsRestClient.CreateListBySyncJobRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, sourceControlSyncJobId, filter);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _sourceControlSyncJobStreamsRestClient.CreateListBySyncJobNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, sourceControlSyncJobId, filter);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, SourceControlSyncJobStream.DeserializeSourceControlSyncJobStream, _sourceControlSyncJobStreamsClientDiagnostics, Pipeline, "AutomationSourceControlResource.GetSourceControlSyncJobStreams", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, SourceControlSyncJobStream.DeserializeSourceControlSyncJobStream, _sourceControlSyncJobStreamsClientDiagnostics, Pipeline, "AutomationSourceControlResource.GetSourceControlSyncJobStreams", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -513,12 +518,12 @@ namespace Azure.ResourceManager.Automation
         /// <param name="sourceControlSyncJobId"> The source control sync job id. </param>
         /// <param name="filter"> The filter to apply on the operation. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="SourceControlSyncJobStream" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="SourceControlSyncJobStream"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<SourceControlSyncJobStream> GetSourceControlSyncJobStreams(Guid sourceControlSyncJobId, string filter = null, CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _sourceControlSyncJobStreamsRestClient.CreateListBySyncJobRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, sourceControlSyncJobId, filter);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _sourceControlSyncJobStreamsRestClient.CreateListBySyncJobNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, sourceControlSyncJobId, filter);
-            return PageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, SourceControlSyncJobStream.DeserializeSourceControlSyncJobStream, _sourceControlSyncJobStreamsClientDiagnostics, Pipeline, "AutomationSourceControlResource.GetSourceControlSyncJobStreams", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, SourceControlSyncJobStream.DeserializeSourceControlSyncJobStream, _sourceControlSyncJobStreamsClientDiagnostics, Pipeline, "AutomationSourceControlResource.GetSourceControlSyncJobStreams", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>

@@ -15,7 +15,7 @@ namespace Azure.ResourceManager.Compute.Models
     /// <summary> Describes a virtual machines IP Configuration's PublicIPAddress configuration. </summary>
     public partial class VirtualMachinePublicIPAddressConfiguration
     {
-        /// <summary> Initializes a new instance of VirtualMachinePublicIPAddressConfiguration. </summary>
+        /// <summary> Initializes a new instance of <see cref="VirtualMachinePublicIPAddressConfiguration"/>. </summary>
         /// <param name="name"> The publicIP address configuration name. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="name"/> is null. </exception>
         public VirtualMachinePublicIPAddressConfiguration(string name)
@@ -26,7 +26,7 @@ namespace Azure.ResourceManager.Compute.Models
             IPTags = new ChangeTrackingList<VirtualMachineIPTag>();
         }
 
-        /// <summary> Initializes a new instance of VirtualMachinePublicIPAddressConfiguration. </summary>
+        /// <summary> Initializes a new instance of <see cref="VirtualMachinePublicIPAddressConfiguration"/>. </summary>
         /// <param name="name"> The publicIP address configuration name. </param>
         /// <param name="sku"> Describes the public IP Sku. It can only be set with OrchestrationMode as Flexible. </param>
         /// <param name="idleTimeoutInMinutes"> The idle timeout of the public IP address. </param>
@@ -58,14 +58,7 @@ namespace Azure.ResourceManager.Compute.Models
         /// <summary> Specify what happens to the public IP address when the VM is deleted. </summary>
         public ComputeDeleteOption? DeleteOption { get; set; }
         /// <summary> The dns settings to be applied on the publicIP addresses . </summary>
-        internal VirtualMachinePublicIPAddressDnsSettingsConfiguration DnsSettings { get; set; }
-        /// <summary> The Domain name label prefix of the PublicIPAddress resources that will be created. The generated name label is the concatenation of the domain name label and vm network profile unique ID. </summary>
-        public string DnsDomainNameLabel
-        {
-            get => DnsSettings is null ? default : DnsSettings.DomainNameLabel;
-            set => DnsSettings = new VirtualMachinePublicIPAddressDnsSettingsConfiguration(value);
-        }
-
+        public VirtualMachinePublicIPAddressDnsSettingsConfiguration DnsSettings { get; set; }
         /// <summary> The list of IP tags associated with the public IP address. </summary>
         public IList<VirtualMachineIPTag> IPTags { get; }
         /// <summary> The PublicIPPrefix from which to allocate publicIP addresses. </summary>

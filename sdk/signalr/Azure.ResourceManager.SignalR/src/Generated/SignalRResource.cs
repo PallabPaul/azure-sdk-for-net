@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -21,13 +22,16 @@ namespace Azure.ResourceManager.SignalR
 {
     /// <summary>
     /// A Class representing a SignalR along with the instance operations that can be performed on it.
-    /// If you have a <see cref="ResourceIdentifier" /> you can construct a <see cref="SignalRResource" />
-    /// from an instance of <see cref="ArmClient" /> using the GetSignalRResource method.
-    /// Otherwise you can get one from its parent resource <see cref="ResourceGroupResource" /> using the GetSignalR method.
+    /// If you have a <see cref="ResourceIdentifier"/> you can construct a <see cref="SignalRResource"/>
+    /// from an instance of <see cref="ArmClient"/> using the GetSignalRResource method.
+    /// Otherwise you can get one from its parent resource <see cref="ResourceGroupResource"/> using the GetSignalR method.
     /// </summary>
     public partial class SignalRResource : ArmResource
     {
         /// <summary> Generate the resource identifier of a <see cref="SignalRResource"/> instance. </summary>
+        /// <param name="subscriptionId"> The subscriptionId. </param>
+        /// <param name="resourceGroupName"> The resourceGroupName. </param>
+        /// <param name="resourceName"> The resourceName. </param>
         public static ResourceIdentifier CreateResourceIdentifier(string subscriptionId, string resourceGroupName, string resourceName)
         {
             var resourceId = $"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.SignalRService/signalR/{resourceName}";
@@ -40,12 +44,15 @@ namespace Azure.ResourceManager.SignalR
         private readonly SignalRPrivateLinkResourcesRestOperations _signalRPrivateLinkResourcesRestClient;
         private readonly SignalRData _data;
 
+        /// <summary> Gets the resource type for the operations. </summary>
+        public static readonly ResourceType ResourceType = "Microsoft.SignalRService/signalR";
+
         /// <summary> Initializes a new instance of the <see cref="SignalRResource"/> class for mocking. </summary>
         protected SignalRResource()
         {
         }
 
-        /// <summary> Initializes a new instance of the <see cref = "SignalRResource"/> class. </summary>
+        /// <summary> Initializes a new instance of the <see cref="SignalRResource"/> class. </summary>
         /// <param name="client"> The client parameters to use in these operations. </param>
         /// <param name="data"> The resource that is the target of operations. </param>
         internal SignalRResource(ArmClient client, SignalRData data) : this(client, data.Id)
@@ -68,9 +75,6 @@ namespace Azure.ResourceManager.SignalR
 			ValidateResourceId(Id);
 #endif
         }
-
-        /// <summary> Gets the resource type for the operations. </summary>
-        public static readonly ResourceType ResourceType = "Microsoft.SignalRService/signalR";
 
         /// <summary> Gets whether or not the current instance has data. </summary>
         public virtual bool HasData { get; }
@@ -97,7 +101,7 @@ namespace Azure.ResourceManager.SignalR
         /// <returns> An object representing collection of SignalRCustomCertificateResources and their operations over a SignalRCustomCertificateResource. </returns>
         public virtual SignalRCustomCertificateCollection GetSignalRCustomCertificates()
         {
-            return GetCachedClient(Client => new SignalRCustomCertificateCollection(Client, Id));
+            return GetCachedClient(client => new SignalRCustomCertificateCollection(client, Id));
         }
 
         /// <summary>
@@ -115,8 +119,8 @@ namespace Azure.ResourceManager.SignalR
         /// </summary>
         /// <param name="certificateName"> Custom certificate name. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="certificateName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="certificateName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="certificateName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<SignalRCustomCertificateResource>> GetSignalRCustomCertificateAsync(string certificateName, CancellationToken cancellationToken = default)
         {
@@ -138,8 +142,8 @@ namespace Azure.ResourceManager.SignalR
         /// </summary>
         /// <param name="certificateName"> Custom certificate name. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="certificateName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="certificateName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="certificateName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<SignalRCustomCertificateResource> GetSignalRCustomCertificate(string certificateName, CancellationToken cancellationToken = default)
         {
@@ -150,7 +154,7 @@ namespace Azure.ResourceManager.SignalR
         /// <returns> An object representing collection of SignalRCustomDomainResources and their operations over a SignalRCustomDomainResource. </returns>
         public virtual SignalRCustomDomainCollection GetSignalRCustomDomains()
         {
-            return GetCachedClient(Client => new SignalRCustomDomainCollection(Client, Id));
+            return GetCachedClient(client => new SignalRCustomDomainCollection(client, Id));
         }
 
         /// <summary>
@@ -168,8 +172,8 @@ namespace Azure.ResourceManager.SignalR
         /// </summary>
         /// <param name="name"> Custom domain name. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="name"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="name"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="name"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<SignalRCustomDomainResource>> GetSignalRCustomDomainAsync(string name, CancellationToken cancellationToken = default)
         {
@@ -191,8 +195,8 @@ namespace Azure.ResourceManager.SignalR
         /// </summary>
         /// <param name="name"> Custom domain name. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="name"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="name"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="name"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<SignalRCustomDomainResource> GetSignalRCustomDomain(string name, CancellationToken cancellationToken = default)
         {
@@ -203,7 +207,7 @@ namespace Azure.ResourceManager.SignalR
         /// <returns> An object representing collection of SignalRPrivateEndpointConnectionResources and their operations over a SignalRPrivateEndpointConnectionResource. </returns>
         public virtual SignalRPrivateEndpointConnectionCollection GetSignalRPrivateEndpointConnections()
         {
-            return GetCachedClient(Client => new SignalRPrivateEndpointConnectionCollection(Client, Id));
+            return GetCachedClient(client => new SignalRPrivateEndpointConnectionCollection(client, Id));
         }
 
         /// <summary>
@@ -221,8 +225,8 @@ namespace Azure.ResourceManager.SignalR
         /// </summary>
         /// <param name="privateEndpointConnectionName"> The name of the private endpoint connection. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="privateEndpointConnectionName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="privateEndpointConnectionName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="privateEndpointConnectionName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<SignalRPrivateEndpointConnectionResource>> GetSignalRPrivateEndpointConnectionAsync(string privateEndpointConnectionName, CancellationToken cancellationToken = default)
         {
@@ -244,8 +248,8 @@ namespace Azure.ResourceManager.SignalR
         /// </summary>
         /// <param name="privateEndpointConnectionName"> The name of the private endpoint connection. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="privateEndpointConnectionName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="privateEndpointConnectionName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="privateEndpointConnectionName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<SignalRPrivateEndpointConnectionResource> GetSignalRPrivateEndpointConnection(string privateEndpointConnectionName, CancellationToken cancellationToken = default)
         {
@@ -256,7 +260,7 @@ namespace Azure.ResourceManager.SignalR
         /// <returns> An object representing collection of SignalRSharedPrivateLinkResources and their operations over a SignalRSharedPrivateLinkResource. </returns>
         public virtual SignalRSharedPrivateLinkResourceCollection GetSignalRSharedPrivateLinkResources()
         {
-            return GetCachedClient(Client => new SignalRSharedPrivateLinkResourceCollection(Client, Id));
+            return GetCachedClient(client => new SignalRSharedPrivateLinkResourceCollection(client, Id));
         }
 
         /// <summary>
@@ -274,8 +278,8 @@ namespace Azure.ResourceManager.SignalR
         /// </summary>
         /// <param name="sharedPrivateLinkResourceName"> The name of the shared private link resource. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="sharedPrivateLinkResourceName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="sharedPrivateLinkResourceName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="sharedPrivateLinkResourceName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<SignalRSharedPrivateLinkResource>> GetSignalRSharedPrivateLinkResourceAsync(string sharedPrivateLinkResourceName, CancellationToken cancellationToken = default)
         {
@@ -297,8 +301,8 @@ namespace Azure.ResourceManager.SignalR
         /// </summary>
         /// <param name="sharedPrivateLinkResourceName"> The name of the shared private link resource. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="sharedPrivateLinkResourceName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="sharedPrivateLinkResourceName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="sharedPrivateLinkResourceName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<SignalRSharedPrivateLinkResource> GetSignalRSharedPrivateLinkResource(string sharedPrivateLinkResourceName, CancellationToken cancellationToken = default)
         {
@@ -731,11 +735,11 @@ namespace Azure.ResourceManager.SignalR
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="SignalRSku" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="SignalRSku"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<SignalRSku> GetSkusAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _signalRRestClient.CreateListSkusRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, null, SignalRSku.DeserializeSignalRSku, _signalRClientDiagnostics, Pipeline, "SignalRResource.GetSkus", "value", null, cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, null, SignalRSku.DeserializeSignalRSku, _signalRClientDiagnostics, Pipeline, "SignalRResource.GetSkus", "value", null, cancellationToken);
         }
 
         /// <summary>
@@ -752,11 +756,11 @@ namespace Azure.ResourceManager.SignalR
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="SignalRSku" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="SignalRSku"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<SignalRSku> GetSkus(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _signalRRestClient.CreateListSkusRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreatePageable(FirstPageRequest, null, SignalRSku.DeserializeSignalRSku, _signalRClientDiagnostics, Pipeline, "SignalRResource.GetSkus", "value", null, cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, null, SignalRSku.DeserializeSignalRSku, _signalRClientDiagnostics, Pipeline, "SignalRResource.GetSkus", "value", null, cancellationToken);
         }
 
         /// <summary>
@@ -773,12 +777,12 @@ namespace Azure.ResourceManager.SignalR
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="SignalRPrivateLinkResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="SignalRPrivateLinkResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<SignalRPrivateLinkResource> GetSignalRPrivateLinkResourcesAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _signalRPrivateLinkResourcesRestClient.CreateListRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _signalRPrivateLinkResourcesRestClient.CreateListNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, SignalRPrivateLinkResource.DeserializeSignalRPrivateLinkResource, _signalRPrivateLinkResourcesClientDiagnostics, Pipeline, "SignalRResource.GetSignalRPrivateLinkResources", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, SignalRPrivateLinkResource.DeserializeSignalRPrivateLinkResource, _signalRPrivateLinkResourcesClientDiagnostics, Pipeline, "SignalRResource.GetSignalRPrivateLinkResources", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -795,12 +799,12 @@ namespace Azure.ResourceManager.SignalR
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="SignalRPrivateLinkResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="SignalRPrivateLinkResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<SignalRPrivateLinkResource> GetSignalRPrivateLinkResources(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _signalRPrivateLinkResourcesRestClient.CreateListRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _signalRPrivateLinkResourcesRestClient.CreateListNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, SignalRPrivateLinkResource.DeserializeSignalRPrivateLinkResource, _signalRPrivateLinkResourcesClientDiagnostics, Pipeline, "SignalRResource.GetSignalRPrivateLinkResources", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, SignalRPrivateLinkResource.DeserializeSignalRPrivateLinkResource, _signalRPrivateLinkResourcesClientDiagnostics, Pipeline, "SignalRResource.GetSignalRPrivateLinkResources", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>

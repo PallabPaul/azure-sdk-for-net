@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -21,13 +22,16 @@ namespace Azure.ResourceManager.RecoveryServices
 {
     /// <summary>
     /// A Class representing a RecoveryServicesVault along with the instance operations that can be performed on it.
-    /// If you have a <see cref="ResourceIdentifier" /> you can construct a <see cref="RecoveryServicesVaultResource" />
-    /// from an instance of <see cref="ArmClient" /> using the GetRecoveryServicesVaultResource method.
-    /// Otherwise you can get one from its parent resource <see cref="ResourceGroupResource" /> using the GetRecoveryServicesVault method.
+    /// If you have a <see cref="ResourceIdentifier"/> you can construct a <see cref="RecoveryServicesVaultResource"/>
+    /// from an instance of <see cref="ArmClient"/> using the GetRecoveryServicesVaultResource method.
+    /// Otherwise you can get one from its parent resource <see cref="ResourceGroupResource"/> using the GetRecoveryServicesVault method.
     /// </summary>
     public partial class RecoveryServicesVaultResource : ArmResource
     {
         /// <summary> Generate the resource identifier of a <see cref="RecoveryServicesVaultResource"/> instance. </summary>
+        /// <param name="subscriptionId"> The subscriptionId. </param>
+        /// <param name="resourceGroupName"> The resourceGroupName. </param>
+        /// <param name="vaultName"> The vaultName. </param>
         public static ResourceIdentifier CreateResourceIdentifier(string subscriptionId, string resourceGroupName, string vaultName)
         {
             var resourceId = $"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.RecoveryServices/vaults/{vaultName}";
@@ -46,12 +50,15 @@ namespace Azure.ResourceManager.RecoveryServices
         private readonly UsagesRestOperations _usagesRestClient;
         private readonly RecoveryServicesVaultData _data;
 
+        /// <summary> Gets the resource type for the operations. </summary>
+        public static readonly ResourceType ResourceType = "Microsoft.RecoveryServices/vaults";
+
         /// <summary> Initializes a new instance of the <see cref="RecoveryServicesVaultResource"/> class for mocking. </summary>
         protected RecoveryServicesVaultResource()
         {
         }
 
-        /// <summary> Initializes a new instance of the <see cref = "RecoveryServicesVaultResource"/> class. </summary>
+        /// <summary> Initializes a new instance of the <see cref="RecoveryServicesVaultResource"/> class. </summary>
         /// <param name="client"> The client parameters to use in these operations. </param>
         /// <param name="data"> The resource that is the target of operations. </param>
         internal RecoveryServicesVaultResource(ArmClient client, RecoveryServicesVaultData data) : this(client, data.Id)
@@ -81,9 +88,6 @@ namespace Azure.ResourceManager.RecoveryServices
 #endif
         }
 
-        /// <summary> Gets the resource type for the operations. </summary>
-        public static readonly ResourceType ResourceType = "Microsoft.RecoveryServices/vaults";
-
         /// <summary> Gets whether or not the current instance has data. </summary>
         public virtual bool HasData { get; }
 
@@ -109,7 +113,7 @@ namespace Azure.ResourceManager.RecoveryServices
         /// <returns> An object representing collection of RecoveryServicesPrivateLinkResources and their operations over a RecoveryServicesPrivateLinkResource. </returns>
         public virtual RecoveryServicesPrivateLinkResourceCollection GetRecoveryServicesPrivateLinkResources()
         {
-            return GetCachedClient(Client => new RecoveryServicesPrivateLinkResourceCollection(Client, Id));
+            return GetCachedClient(client => new RecoveryServicesPrivateLinkResourceCollection(client, Id));
         }
 
         /// <summary>
@@ -125,10 +129,10 @@ namespace Azure.ResourceManager.RecoveryServices
         /// </item>
         /// </list>
         /// </summary>
-        /// <param name="privateLinkResourceName"> The String to use. </param>
+        /// <param name="privateLinkResourceName"> The <see cref="string"/> to use. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="privateLinkResourceName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="privateLinkResourceName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="privateLinkResourceName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual async Task<Response<RecoveryServicesPrivateLinkResource>> GetRecoveryServicesPrivateLinkResourceAsync(string privateLinkResourceName, CancellationToken cancellationToken = default)
         {
@@ -148,10 +152,10 @@ namespace Azure.ResourceManager.RecoveryServices
         /// </item>
         /// </list>
         /// </summary>
-        /// <param name="privateLinkResourceName"> The String to use. </param>
+        /// <param name="privateLinkResourceName"> The <see cref="string"/> to use. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <exception cref="ArgumentException"> <paramref name="privateLinkResourceName"/> is an empty string, and was expected to be non-empty. </exception>
         /// <exception cref="ArgumentNullException"> <paramref name="privateLinkResourceName"/> is null. </exception>
+        /// <exception cref="ArgumentException"> <paramref name="privateLinkResourceName"/> is an empty string, and was expected to be non-empty. </exception>
         [ForwardsClientCalls]
         public virtual Response<RecoveryServicesPrivateLinkResource> GetRecoveryServicesPrivateLinkResource(string privateLinkResourceName, CancellationToken cancellationToken = default)
         {
@@ -159,7 +163,7 @@ namespace Azure.ResourceManager.RecoveryServices
         }
 
         /// <summary> Gets an object representing a RecoveryServicesVaultExtendedInfoResource along with the instance operations that can be performed on it in the RecoveryServicesVault. </summary>
-        /// <returns> Returns a <see cref="RecoveryServicesVaultExtendedInfoResource" /> object. </returns>
+        /// <returns> Returns a <see cref="RecoveryServicesVaultExtendedInfoResource"/> object. </returns>
         public virtual RecoveryServicesVaultExtendedInfoResource GetRecoveryServicesVaultExtendedInfo()
         {
             return new RecoveryServicesVaultExtendedInfoResource(Client, Id.AppendChildResource("extendedInformation", "vaultExtendedInfo"));
@@ -531,11 +535,11 @@ namespace Azure.ResourceManager.RecoveryServices
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="ReplicationUsage" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="ReplicationUsage"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<ReplicationUsage> GetReplicationUsagesAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _replicationUsagesRestClient.CreateListRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, null, ReplicationUsage.DeserializeReplicationUsage, _replicationUsagesClientDiagnostics, Pipeline, "RecoveryServicesVaultResource.GetReplicationUsages", "value", null, cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, null, ReplicationUsage.DeserializeReplicationUsage, _replicationUsagesClientDiagnostics, Pipeline, "RecoveryServicesVaultResource.GetReplicationUsages", "value", null, cancellationToken);
         }
 
         /// <summary>
@@ -552,11 +556,11 @@ namespace Azure.ResourceManager.RecoveryServices
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="ReplicationUsage" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="ReplicationUsage"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<ReplicationUsage> GetReplicationUsages(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _replicationUsagesRestClient.CreateListRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreatePageable(FirstPageRequest, null, ReplicationUsage.DeserializeReplicationUsage, _replicationUsagesClientDiagnostics, Pipeline, "RecoveryServicesVaultResource.GetReplicationUsages", "value", null, cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, null, ReplicationUsage.DeserializeReplicationUsage, _replicationUsagesClientDiagnostics, Pipeline, "RecoveryServicesVaultResource.GetReplicationUsages", "value", null, cancellationToken);
         }
 
         /// <summary>
@@ -573,11 +577,11 @@ namespace Azure.ResourceManager.RecoveryServices
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="VaultUsage" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="VaultUsage"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<VaultUsage> GetUsagesByVaultsAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _usagesRestClient.CreateListByVaultsRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, null, VaultUsage.DeserializeVaultUsage, _usagesClientDiagnostics, Pipeline, "RecoveryServicesVaultResource.GetUsagesByVaults", "value", null, cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, null, VaultUsage.DeserializeVaultUsage, _usagesClientDiagnostics, Pipeline, "RecoveryServicesVaultResource.GetUsagesByVaults", "value", null, cancellationToken);
         }
 
         /// <summary>
@@ -594,11 +598,11 @@ namespace Azure.ResourceManager.RecoveryServices
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="VaultUsage" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="VaultUsage"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<VaultUsage> GetUsagesByVaults(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _usagesRestClient.CreateListByVaultsRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreatePageable(FirstPageRequest, null, VaultUsage.DeserializeVaultUsage, _usagesClientDiagnostics, Pipeline, "RecoveryServicesVaultResource.GetUsagesByVaults", "value", null, cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, null, VaultUsage.DeserializeVaultUsage, _usagesClientDiagnostics, Pipeline, "RecoveryServicesVaultResource.GetUsagesByVaults", "value", null, cancellationToken);
         }
 
         /// <summary>

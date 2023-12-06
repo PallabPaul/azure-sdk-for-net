@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -20,9 +21,9 @@ using Azure.ResourceManager.StorageSync.Models;
 namespace Azure.ResourceManager.StorageSync
 {
     /// <summary>
-    /// A class representing a collection of <see cref="StorageSyncServerEndpointResource" /> and their operations.
-    /// Each <see cref="StorageSyncServerEndpointResource" /> in the collection will belong to the same instance of <see cref="StorageSyncGroupResource" />.
-    /// To get a <see cref="StorageSyncServerEndpointCollection" /> instance call the GetStorageSyncServerEndpoints method from an instance of <see cref="StorageSyncGroupResource" />.
+    /// A class representing a collection of <see cref="StorageSyncServerEndpointResource"/> and their operations.
+    /// Each <see cref="StorageSyncServerEndpointResource"/> in the collection will belong to the same instance of <see cref="StorageSyncGroupResource"/>.
+    /// To get a <see cref="StorageSyncServerEndpointCollection"/> instance call the GetStorageSyncServerEndpoints method from an instance of <see cref="StorageSyncGroupResource"/>.
     /// </summary>
     public partial class StorageSyncServerEndpointCollection : ArmCollection, IEnumerable<StorageSyncServerEndpointResource>, IAsyncEnumerable<StorageSyncServerEndpointResource>
     {
@@ -223,11 +224,11 @@ namespace Azure.ResourceManager.StorageSync
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="StorageSyncServerEndpointResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="StorageSyncServerEndpointResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<StorageSyncServerEndpointResource> GetAllAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _storageSyncServerEndpointServerEndpointsRestClient.CreateListBySyncGroupRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, null, e => new StorageSyncServerEndpointResource(Client, StorageSyncServerEndpointData.DeserializeStorageSyncServerEndpointData(e)), _storageSyncServerEndpointServerEndpointsClientDiagnostics, Pipeline, "StorageSyncServerEndpointCollection.GetAll", "value", null, cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, null, e => new StorageSyncServerEndpointResource(Client, StorageSyncServerEndpointData.DeserializeStorageSyncServerEndpointData(e)), _storageSyncServerEndpointServerEndpointsClientDiagnostics, Pipeline, "StorageSyncServerEndpointCollection.GetAll", "value", null, cancellationToken);
         }
 
         /// <summary>
@@ -244,11 +245,11 @@ namespace Azure.ResourceManager.StorageSync
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="StorageSyncServerEndpointResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="StorageSyncServerEndpointResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<StorageSyncServerEndpointResource> GetAll(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _storageSyncServerEndpointServerEndpointsRestClient.CreateListBySyncGroupRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name);
-            return PageableHelpers.CreatePageable(FirstPageRequest, null, e => new StorageSyncServerEndpointResource(Client, StorageSyncServerEndpointData.DeserializeStorageSyncServerEndpointData(e)), _storageSyncServerEndpointServerEndpointsClientDiagnostics, Pipeline, "StorageSyncServerEndpointCollection.GetAll", "value", null, cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, null, e => new StorageSyncServerEndpointResource(Client, StorageSyncServerEndpointData.DeserializeStorageSyncServerEndpointData(e)), _storageSyncServerEndpointServerEndpointsClientDiagnostics, Pipeline, "StorageSyncServerEndpointCollection.GetAll", "value", null, cancellationToken);
         }
 
         /// <summary>
@@ -313,6 +314,80 @@ namespace Azure.ResourceManager.StorageSync
             {
                 var response = _storageSyncServerEndpointServerEndpointsRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, serverEndpointName, cancellationToken: cancellationToken);
                 return Response.FromValue(response.Value != null, response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/syncGroups/{syncGroupName}/serverEndpoints/{serverEndpointName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>ServerEndpoints_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="serverEndpointName"> Name of Server Endpoint object. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="serverEndpointName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="serverEndpointName"/> is null. </exception>
+        public virtual async Task<NullableResponse<StorageSyncServerEndpointResource>> GetIfExistsAsync(string serverEndpointName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(serverEndpointName, nameof(serverEndpointName));
+
+            using var scope = _storageSyncServerEndpointServerEndpointsClientDiagnostics.CreateScope("StorageSyncServerEndpointCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = await _storageSyncServerEndpointServerEndpointsRestClient.GetAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, serverEndpointName, cancellationToken: cancellationToken).ConfigureAwait(false);
+                if (response.Value == null)
+                    return new NoValueResponse<StorageSyncServerEndpointResource>(response.GetRawResponse());
+                return Response.FromValue(new StorageSyncServerEndpointResource(Client, response.Value), response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.StorageSync/storageSyncServices/{storageSyncServiceName}/syncGroups/{syncGroupName}/serverEndpoints/{serverEndpointName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>ServerEndpoints_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="serverEndpointName"> Name of Server Endpoint object. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="serverEndpointName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="serverEndpointName"/> is null. </exception>
+        public virtual NullableResponse<StorageSyncServerEndpointResource> GetIfExists(string serverEndpointName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(serverEndpointName, nameof(serverEndpointName));
+
+            using var scope = _storageSyncServerEndpointServerEndpointsClientDiagnostics.CreateScope("StorageSyncServerEndpointCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = _storageSyncServerEndpointServerEndpointsRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, serverEndpointName, cancellationToken: cancellationToken);
+                if (response.Value == null)
+                    return new NoValueResponse<StorageSyncServerEndpointResource>(response.GetRawResponse());
+                return Response.FromValue(new StorageSyncServerEndpointResource(Client, response.Value), response.GetRawResponse());
             }
             catch (Exception e)
             {

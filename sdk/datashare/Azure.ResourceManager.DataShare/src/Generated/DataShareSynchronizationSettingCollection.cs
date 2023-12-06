@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -19,9 +20,9 @@ using Azure.ResourceManager;
 namespace Azure.ResourceManager.DataShare
 {
     /// <summary>
-    /// A class representing a collection of <see cref="DataShareSynchronizationSettingResource" /> and their operations.
-    /// Each <see cref="DataShareSynchronizationSettingResource" /> in the collection will belong to the same instance of <see cref="DataShareResource" />.
-    /// To get a <see cref="DataShareSynchronizationSettingCollection" /> instance call the GetDataShareSynchronizationSettings method from an instance of <see cref="DataShareResource" />.
+    /// A class representing a collection of <see cref="DataShareSynchronizationSettingResource"/> and their operations.
+    /// Each <see cref="DataShareSynchronizationSettingResource"/> in the collection will belong to the same instance of <see cref="DataShareResource"/>.
+    /// To get a <see cref="DataShareSynchronizationSettingCollection"/> instance call the GetDataShareSynchronizationSettings method from an instance of <see cref="DataShareResource"/>.
     /// </summary>
     public partial class DataShareSynchronizationSettingCollection : ArmCollection, IEnumerable<DataShareSynchronizationSettingResource>, IAsyncEnumerable<DataShareSynchronizationSettingResource>
     {
@@ -223,12 +224,12 @@ namespace Azure.ResourceManager.DataShare
         /// </summary>
         /// <param name="skipToken"> continuation token. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="DataShareSynchronizationSettingResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="DataShareSynchronizationSettingResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<DataShareSynchronizationSettingResource> GetAllAsync(string skipToken = null, CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _dataShareSynchronizationSettingSynchronizationSettingsRestClient.CreateListByShareRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, skipToken);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _dataShareSynchronizationSettingSynchronizationSettingsRestClient.CreateListByShareNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, skipToken);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new DataShareSynchronizationSettingResource(Client, DataShareSynchronizationSettingData.DeserializeDataShareSynchronizationSettingData(e)), _dataShareSynchronizationSettingSynchronizationSettingsClientDiagnostics, Pipeline, "DataShareSynchronizationSettingCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new DataShareSynchronizationSettingResource(Client, DataShareSynchronizationSettingData.DeserializeDataShareSynchronizationSettingData(e)), _dataShareSynchronizationSettingSynchronizationSettingsClientDiagnostics, Pipeline, "DataShareSynchronizationSettingCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -246,12 +247,12 @@ namespace Azure.ResourceManager.DataShare
         /// </summary>
         /// <param name="skipToken"> continuation token. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="DataShareSynchronizationSettingResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="DataShareSynchronizationSettingResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<DataShareSynchronizationSettingResource> GetAll(string skipToken = null, CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _dataShareSynchronizationSettingSynchronizationSettingsRestClient.CreateListByShareRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, skipToken);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _dataShareSynchronizationSettingSynchronizationSettingsRestClient.CreateListByShareNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, skipToken);
-            return PageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new DataShareSynchronizationSettingResource(Client, DataShareSynchronizationSettingData.DeserializeDataShareSynchronizationSettingData(e)), _dataShareSynchronizationSettingSynchronizationSettingsClientDiagnostics, Pipeline, "DataShareSynchronizationSettingCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new DataShareSynchronizationSettingResource(Client, DataShareSynchronizationSettingData.DeserializeDataShareSynchronizationSettingData(e)), _dataShareSynchronizationSettingSynchronizationSettingsClientDiagnostics, Pipeline, "DataShareSynchronizationSettingCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -316,6 +317,80 @@ namespace Azure.ResourceManager.DataShare
             {
                 var response = _dataShareSynchronizationSettingSynchronizationSettingsRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, synchronizationSettingName, cancellationToken: cancellationToken);
                 return Response.FromValue(response.Value != null, response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataShare/accounts/{accountName}/shares/{shareName}/synchronizationSettings/{synchronizationSettingName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>SynchronizationSettings_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="synchronizationSettingName"> The name of the synchronizationSetting. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="synchronizationSettingName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="synchronizationSettingName"/> is null. </exception>
+        public virtual async Task<NullableResponse<DataShareSynchronizationSettingResource>> GetIfExistsAsync(string synchronizationSettingName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(synchronizationSettingName, nameof(synchronizationSettingName));
+
+            using var scope = _dataShareSynchronizationSettingSynchronizationSettingsClientDiagnostics.CreateScope("DataShareSynchronizationSettingCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = await _dataShareSynchronizationSettingSynchronizationSettingsRestClient.GetAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, synchronizationSettingName, cancellationToken: cancellationToken).ConfigureAwait(false);
+                if (response.Value == null)
+                    return new NoValueResponse<DataShareSynchronizationSettingResource>(response.GetRawResponse());
+                return Response.FromValue(new DataShareSynchronizationSettingResource(Client, response.Value), response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataShare/accounts/{accountName}/shares/{shareName}/synchronizationSettings/{synchronizationSettingName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>SynchronizationSettings_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="synchronizationSettingName"> The name of the synchronizationSetting. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="synchronizationSettingName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="synchronizationSettingName"/> is null. </exception>
+        public virtual NullableResponse<DataShareSynchronizationSettingResource> GetIfExists(string synchronizationSettingName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(synchronizationSettingName, nameof(synchronizationSettingName));
+
+            using var scope = _dataShareSynchronizationSettingSynchronizationSettingsClientDiagnostics.CreateScope("DataShareSynchronizationSettingCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = _dataShareSynchronizationSettingSynchronizationSettingsRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, synchronizationSettingName, cancellationToken: cancellationToken);
+                if (response.Value == null)
+                    return new NoValueResponse<DataShareSynchronizationSettingResource>(response.GetRawResponse());
+                return Response.FromValue(new DataShareSynchronizationSettingResource(Client, response.Value), response.GetRawResponse());
             }
             catch (Exception e)
             {

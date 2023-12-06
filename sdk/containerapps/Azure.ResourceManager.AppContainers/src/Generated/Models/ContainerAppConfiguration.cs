@@ -13,14 +13,14 @@ namespace Azure.ResourceManager.AppContainers.Models
     /// <summary> Non versioned Container App configuration properties that define the mutable settings of a Container app. </summary>
     public partial class ContainerAppConfiguration
     {
-        /// <summary> Initializes a new instance of ContainerAppConfiguration. </summary>
+        /// <summary> Initializes a new instance of <see cref="ContainerAppConfiguration"/>. </summary>
         public ContainerAppConfiguration()
         {
             Secrets = new ChangeTrackingList<ContainerAppWritableSecret>();
             Registries = new ChangeTrackingList<ContainerAppRegistryCredentials>();
         }
 
-        /// <summary> Initializes a new instance of ContainerAppConfiguration. </summary>
+        /// <summary> Initializes a new instance of <see cref="ContainerAppConfiguration"/>. </summary>
         /// <param name="secrets"> Collection of secrets used by a Container app. </param>
         /// <param name="activeRevisionsMode">
         /// ActiveRevisionsMode controls how active revisions are handled for the Container app:
@@ -30,7 +30,8 @@ namespace Azure.ResourceManager.AppContainers.Models
         /// <param name="registries"> Collection of private container registry credentials for containers used by the Container app. </param>
         /// <param name="dapr"> Dapr configuration for the Container App. </param>
         /// <param name="maxInactiveRevisions"> Optional. Max inactive revisions a Container App can have. </param>
-        internal ContainerAppConfiguration(IList<ContainerAppWritableSecret> secrets, ContainerAppActiveRevisionsMode? activeRevisionsMode, ContainerAppIngressConfiguration ingress, IList<ContainerAppRegistryCredentials> registries, ContainerAppDaprConfiguration dapr, int? maxInactiveRevisions)
+        /// <param name="service"> Container App to be a dev Container App Service. </param>
+        internal ContainerAppConfiguration(IList<ContainerAppWritableSecret> secrets, ContainerAppActiveRevisionsMode? activeRevisionsMode, ContainerAppIngressConfiguration ingress, IList<ContainerAppRegistryCredentials> registries, ContainerAppDaprConfiguration dapr, int? maxInactiveRevisions, Service service)
         {
             Secrets = secrets;
             ActiveRevisionsMode = activeRevisionsMode;
@@ -38,6 +39,7 @@ namespace Azure.ResourceManager.AppContainers.Models
             Registries = registries;
             Dapr = dapr;
             MaxInactiveRevisions = maxInactiveRevisions;
+            Service = service;
         }
 
         /// <summary> Collection of secrets used by a Container app. </summary>
@@ -55,5 +57,13 @@ namespace Azure.ResourceManager.AppContainers.Models
         public ContainerAppDaprConfiguration Dapr { get; set; }
         /// <summary> Optional. Max inactive revisions a Container App can have. </summary>
         public int? MaxInactiveRevisions { get; set; }
+        /// <summary> Container App to be a dev Container App Service. </summary>
+        internal Service Service { get; set; }
+        /// <summary> Dev ContainerApp service type. </summary>
+        public string ServiceType
+        {
+            get => Service is null ? default : Service.ServiceType;
+            set => Service = new Service(value);
+        }
     }
 }

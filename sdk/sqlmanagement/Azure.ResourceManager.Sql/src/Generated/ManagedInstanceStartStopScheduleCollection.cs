@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -20,9 +21,9 @@ using Azure.ResourceManager.Sql.Models;
 namespace Azure.ResourceManager.Sql
 {
     /// <summary>
-    /// A class representing a collection of <see cref="ManagedInstanceStartStopScheduleResource" /> and their operations.
-    /// Each <see cref="ManagedInstanceStartStopScheduleResource" /> in the collection will belong to the same instance of <see cref="ManagedInstanceResource" />.
-    /// To get a <see cref="ManagedInstanceStartStopScheduleCollection" /> instance call the GetManagedInstanceStartStopSchedules method from an instance of <see cref="ManagedInstanceResource" />.
+    /// A class representing a collection of <see cref="ManagedInstanceStartStopScheduleResource"/> and their operations.
+    /// Each <see cref="ManagedInstanceStartStopScheduleResource"/> in the collection will belong to the same instance of <see cref="ManagedInstanceResource"/>.
+    /// To get a <see cref="ManagedInstanceStartStopScheduleCollection"/> instance call the GetManagedInstanceStartStopSchedules method from an instance of <see cref="ManagedInstanceResource"/>.
     /// </summary>
     public partial class ManagedInstanceStartStopScheduleCollection : ArmCollection, IEnumerable<ManagedInstanceStartStopScheduleResource>, IAsyncEnumerable<ManagedInstanceStartStopScheduleResource>
     {
@@ -211,12 +212,12 @@ namespace Azure.ResourceManager.Sql
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="ManagedInstanceStartStopScheduleResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="ManagedInstanceStartStopScheduleResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<ManagedInstanceStartStopScheduleResource> GetAllAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _managedInstanceStartStopScheduleStartStopManagedInstanceSchedulesRestClient.CreateListByInstanceRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _managedInstanceStartStopScheduleStartStopManagedInstanceSchedulesRestClient.CreateListByInstanceNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new ManagedInstanceStartStopScheduleResource(Client, ManagedInstanceStartStopScheduleData.DeserializeManagedInstanceStartStopScheduleData(e)), _managedInstanceStartStopScheduleStartStopManagedInstanceSchedulesClientDiagnostics, Pipeline, "ManagedInstanceStartStopScheduleCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new ManagedInstanceStartStopScheduleResource(Client, ManagedInstanceStartStopScheduleData.DeserializeManagedInstanceStartStopScheduleData(e)), _managedInstanceStartStopScheduleStartStopManagedInstanceSchedulesClientDiagnostics, Pipeline, "ManagedInstanceStartStopScheduleCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -233,12 +234,12 @@ namespace Azure.ResourceManager.Sql
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="ManagedInstanceStartStopScheduleResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="ManagedInstanceStartStopScheduleResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<ManagedInstanceStartStopScheduleResource> GetAll(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _managedInstanceStartStopScheduleStartStopManagedInstanceSchedulesRestClient.CreateListByInstanceRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _managedInstanceStartStopScheduleStartStopManagedInstanceSchedulesRestClient.CreateListByInstanceNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new ManagedInstanceStartStopScheduleResource(Client, ManagedInstanceStartStopScheduleData.DeserializeManagedInstanceStartStopScheduleData(e)), _managedInstanceStartStopScheduleStartStopManagedInstanceSchedulesClientDiagnostics, Pipeline, "ManagedInstanceStartStopScheduleCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new ManagedInstanceStartStopScheduleResource(Client, ManagedInstanceStartStopScheduleData.DeserializeManagedInstanceStartStopScheduleData(e)), _managedInstanceStartStopScheduleStartStopManagedInstanceSchedulesClientDiagnostics, Pipeline, "ManagedInstanceStartStopScheduleCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -295,6 +296,72 @@ namespace Azure.ResourceManager.Sql
             {
                 var response = _managedInstanceStartStopScheduleStartStopManagedInstanceSchedulesRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, startStopScheduleName, cancellationToken: cancellationToken);
                 return Response.FromValue(response.Value != null, response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/startStopSchedules/{startStopScheduleName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>StartStopManagedInstanceSchedules_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="startStopScheduleName"> Name of the managed instance Start/Stop schedule. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual async Task<NullableResponse<ManagedInstanceStartStopScheduleResource>> GetIfExistsAsync(ManagedInstanceStartStopScheduleName startStopScheduleName, CancellationToken cancellationToken = default)
+        {
+            using var scope = _managedInstanceStartStopScheduleStartStopManagedInstanceSchedulesClientDiagnostics.CreateScope("ManagedInstanceStartStopScheduleCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = await _managedInstanceStartStopScheduleStartStopManagedInstanceSchedulesRestClient.GetAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, startStopScheduleName, cancellationToken: cancellationToken).ConfigureAwait(false);
+                if (response.Value == null)
+                    return new NoValueResponse<ManagedInstanceStartStopScheduleResource>(response.GetRawResponse());
+                return Response.FromValue(new ManagedInstanceStartStopScheduleResource(Client, response.Value), response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Sql/managedInstances/{managedInstanceName}/startStopSchedules/{startStopScheduleName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>StartStopManagedInstanceSchedules_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="startStopScheduleName"> Name of the managed instance Start/Stop schedule. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        public virtual NullableResponse<ManagedInstanceStartStopScheduleResource> GetIfExists(ManagedInstanceStartStopScheduleName startStopScheduleName, CancellationToken cancellationToken = default)
+        {
+            using var scope = _managedInstanceStartStopScheduleStartStopManagedInstanceSchedulesClientDiagnostics.CreateScope("ManagedInstanceStartStopScheduleCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = _managedInstanceStartStopScheduleStartStopManagedInstanceSchedulesRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, startStopScheduleName, cancellationToken: cancellationToken);
+                if (response.Value == null)
+                    return new NoValueResponse<ManagedInstanceStartStopScheduleResource>(response.GetRawResponse());
+                return Response.FromValue(new ManagedInstanceStartStopScheduleResource(Client, response.Value), response.GetRawResponse());
             }
             catch (Exception e)
             {

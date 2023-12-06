@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -20,13 +21,17 @@ namespace Azure.ResourceManager.Logic
 {
     /// <summary>
     /// A Class representing an IntegrationServiceEnvironmentManagedApi along with the instance operations that can be performed on it.
-    /// If you have a <see cref="ResourceIdentifier" /> you can construct an <see cref="IntegrationServiceEnvironmentManagedApiResource" />
-    /// from an instance of <see cref="ArmClient" /> using the GetIntegrationServiceEnvironmentManagedApiResource method.
-    /// Otherwise you can get one from its parent resource <see cref="IntegrationServiceEnvironmentResource" /> using the GetIntegrationServiceEnvironmentManagedApi method.
+    /// If you have a <see cref="ResourceIdentifier"/> you can construct an <see cref="IntegrationServiceEnvironmentManagedApiResource"/>
+    /// from an instance of <see cref="ArmClient"/> using the GetIntegrationServiceEnvironmentManagedApiResource method.
+    /// Otherwise you can get one from its parent resource <see cref="IntegrationServiceEnvironmentResource"/> using the GetIntegrationServiceEnvironmentManagedApi method.
     /// </summary>
     public partial class IntegrationServiceEnvironmentManagedApiResource : ArmResource
     {
         /// <summary> Generate the resource identifier of a <see cref="IntegrationServiceEnvironmentManagedApiResource"/> instance. </summary>
+        /// <param name="subscriptionId"> The subscriptionId. </param>
+        /// <param name="resourceGroup"> The resourceGroup. </param>
+        /// <param name="integrationServiceEnvironmentName"> The integrationServiceEnvironmentName. </param>
+        /// <param name="apiName"> The apiName. </param>
         public static ResourceIdentifier CreateResourceIdentifier(string subscriptionId, string resourceGroup, string integrationServiceEnvironmentName, string apiName)
         {
             var resourceId = $"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Logic/integrationServiceEnvironments/{integrationServiceEnvironmentName}/managedApis/{apiName}";
@@ -39,12 +44,15 @@ namespace Azure.ResourceManager.Logic
         private readonly IntegrationServiceEnvironmentManagedApiRestOperations _integrationServiceEnvironmentManagedApiOperationsRestClient;
         private readonly IntegrationServiceEnvironmentManagedApiData _data;
 
+        /// <summary> Gets the resource type for the operations. </summary>
+        public static readonly ResourceType ResourceType = "Microsoft.Logic/integrationServiceEnvironments/managedApis";
+
         /// <summary> Initializes a new instance of the <see cref="IntegrationServiceEnvironmentManagedApiResource"/> class for mocking. </summary>
         protected IntegrationServiceEnvironmentManagedApiResource()
         {
         }
 
-        /// <summary> Initializes a new instance of the <see cref = "IntegrationServiceEnvironmentManagedApiResource"/> class. </summary>
+        /// <summary> Initializes a new instance of the <see cref="IntegrationServiceEnvironmentManagedApiResource"/> class. </summary>
         /// <param name="client"> The client parameters to use in these operations. </param>
         /// <param name="data"> The resource that is the target of operations. </param>
         internal IntegrationServiceEnvironmentManagedApiResource(ArmClient client, IntegrationServiceEnvironmentManagedApiData data) : this(client, data.Id)
@@ -67,9 +75,6 @@ namespace Azure.ResourceManager.Logic
 			ValidateResourceId(Id);
 #endif
         }
-
-        /// <summary> Gets the resource type for the operations. </summary>
-        public static readonly ResourceType ResourceType = "Microsoft.Logic/integrationServiceEnvironments/managedApis";
 
         /// <summary> Gets whether or not the current instance has data. </summary>
         public virtual bool HasData { get; }
@@ -314,12 +319,12 @@ namespace Azure.ResourceManager.Logic
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="LogicApiOperationInfo" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="LogicApiOperationInfo"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<LogicApiOperationInfo> GetIntegrationServiceEnvironmentManagedApiOperationsAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _integrationServiceEnvironmentManagedApiOperationsRestClient.CreateListRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _integrationServiceEnvironmentManagedApiOperationsRestClient.CreateListNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, LogicApiOperationInfo.DeserializeLogicApiOperationInfo, _integrationServiceEnvironmentManagedApiOperationsClientDiagnostics, Pipeline, "IntegrationServiceEnvironmentManagedApiResource.GetIntegrationServiceEnvironmentManagedApiOperations", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, LogicApiOperationInfo.DeserializeLogicApiOperationInfo, _integrationServiceEnvironmentManagedApiOperationsClientDiagnostics, Pipeline, "IntegrationServiceEnvironmentManagedApiResource.GetIntegrationServiceEnvironmentManagedApiOperations", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -336,12 +341,12 @@ namespace Azure.ResourceManager.Logic
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="LogicApiOperationInfo" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="LogicApiOperationInfo"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<LogicApiOperationInfo> GetIntegrationServiceEnvironmentManagedApiOperations(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _integrationServiceEnvironmentManagedApiOperationsRestClient.CreateListRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _integrationServiceEnvironmentManagedApiOperationsRestClient.CreateListNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name);
-            return PageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, LogicApiOperationInfo.DeserializeLogicApiOperationInfo, _integrationServiceEnvironmentManagedApiOperationsClientDiagnostics, Pipeline, "IntegrationServiceEnvironmentManagedApiResource.GetIntegrationServiceEnvironmentManagedApiOperations", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, LogicApiOperationInfo.DeserializeLogicApiOperationInfo, _integrationServiceEnvironmentManagedApiOperationsClientDiagnostics, Pipeline, "IntegrationServiceEnvironmentManagedApiResource.GetIntegrationServiceEnvironmentManagedApiOperations", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>

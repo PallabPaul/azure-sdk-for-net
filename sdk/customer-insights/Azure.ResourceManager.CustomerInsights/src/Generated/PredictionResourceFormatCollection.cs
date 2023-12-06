@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -19,9 +20,9 @@ using Azure.ResourceManager;
 namespace Azure.ResourceManager.CustomerInsights
 {
     /// <summary>
-    /// A class representing a collection of <see cref="PredictionResourceFormatResource" /> and their operations.
-    /// Each <see cref="PredictionResourceFormatResource" /> in the collection will belong to the same instance of <see cref="HubResource" />.
-    /// To get a <see cref="PredictionResourceFormatCollection" /> instance call the GetPredictionResourceFormats method from an instance of <see cref="HubResource" />.
+    /// A class representing a collection of <see cref="PredictionResourceFormatResource"/> and their operations.
+    /// Each <see cref="PredictionResourceFormatResource"/> in the collection will belong to the same instance of <see cref="HubResource"/>.
+    /// To get a <see cref="PredictionResourceFormatCollection"/> instance call the GetPredictionResourceFormats method from an instance of <see cref="HubResource"/>.
     /// </summary>
     public partial class PredictionResourceFormatCollection : ArmCollection, IEnumerable<PredictionResourceFormatResource>, IAsyncEnumerable<PredictionResourceFormatResource>
     {
@@ -222,12 +223,12 @@ namespace Azure.ResourceManager.CustomerInsights
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="PredictionResourceFormatResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="PredictionResourceFormatResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<PredictionResourceFormatResource> GetAllAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _predictionResourceFormatPredictionsRestClient.CreateListByHubRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _predictionResourceFormatPredictionsRestClient.CreateListByHubNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new PredictionResourceFormatResource(Client, PredictionResourceFormatData.DeserializePredictionResourceFormatData(e)), _predictionResourceFormatPredictionsClientDiagnostics, Pipeline, "PredictionResourceFormatCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new PredictionResourceFormatResource(Client, PredictionResourceFormatData.DeserializePredictionResourceFormatData(e)), _predictionResourceFormatPredictionsClientDiagnostics, Pipeline, "PredictionResourceFormatCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -244,12 +245,12 @@ namespace Azure.ResourceManager.CustomerInsights
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="PredictionResourceFormatResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="PredictionResourceFormatResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<PredictionResourceFormatResource> GetAll(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _predictionResourceFormatPredictionsRestClient.CreateListByHubRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _predictionResourceFormatPredictionsRestClient.CreateListByHubNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new PredictionResourceFormatResource(Client, PredictionResourceFormatData.DeserializePredictionResourceFormatData(e)), _predictionResourceFormatPredictionsClientDiagnostics, Pipeline, "PredictionResourceFormatCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new PredictionResourceFormatResource(Client, PredictionResourceFormatData.DeserializePredictionResourceFormatData(e)), _predictionResourceFormatPredictionsClientDiagnostics, Pipeline, "PredictionResourceFormatCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -314,6 +315,80 @@ namespace Azure.ResourceManager.CustomerInsights
             {
                 var response = _predictionResourceFormatPredictionsRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, predictionName, cancellationToken: cancellationToken);
                 return Response.FromValue(response.Value != null, response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CustomerInsights/hubs/{hubName}/predictions/{predictionName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>Predictions_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="predictionName"> The name of the Prediction. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="predictionName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="predictionName"/> is null. </exception>
+        public virtual async Task<NullableResponse<PredictionResourceFormatResource>> GetIfExistsAsync(string predictionName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(predictionName, nameof(predictionName));
+
+            using var scope = _predictionResourceFormatPredictionsClientDiagnostics.CreateScope("PredictionResourceFormatCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = await _predictionResourceFormatPredictionsRestClient.GetAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, predictionName, cancellationToken: cancellationToken).ConfigureAwait(false);
+                if (response.Value == null)
+                    return new NoValueResponse<PredictionResourceFormatResource>(response.GetRawResponse());
+                return Response.FromValue(new PredictionResourceFormatResource(Client, response.Value), response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.CustomerInsights/hubs/{hubName}/predictions/{predictionName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>Predictions_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="predictionName"> The name of the Prediction. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="predictionName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="predictionName"/> is null. </exception>
+        public virtual NullableResponse<PredictionResourceFormatResource> GetIfExists(string predictionName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(predictionName, nameof(predictionName));
+
+            using var scope = _predictionResourceFormatPredictionsClientDiagnostics.CreateScope("PredictionResourceFormatCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = _predictionResourceFormatPredictionsRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, predictionName, cancellationToken: cancellationToken);
+                if (response.Value == null)
+                    return new NoValueResponse<PredictionResourceFormatResource>(response.GetRawResponse());
+                return Response.FromValue(new PredictionResourceFormatResource(Client, response.Value), response.GetRawResponse());
             }
             catch (Exception e)
             {

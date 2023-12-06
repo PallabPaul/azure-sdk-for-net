@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -21,13 +22,16 @@ namespace Azure.ResourceManager.DataBox
 {
     /// <summary>
     /// A Class representing a DataBoxJob along with the instance operations that can be performed on it.
-    /// If you have a <see cref="ResourceIdentifier" /> you can construct a <see cref="DataBoxJobResource" />
-    /// from an instance of <see cref="ArmClient" /> using the GetDataBoxJobResource method.
-    /// Otherwise you can get one from its parent resource <see cref="ResourceGroupResource" /> using the GetDataBoxJob method.
+    /// If you have a <see cref="ResourceIdentifier"/> you can construct a <see cref="DataBoxJobResource"/>
+    /// from an instance of <see cref="ArmClient"/> using the GetDataBoxJobResource method.
+    /// Otherwise you can get one from its parent resource <see cref="ResourceGroupResource"/> using the GetDataBoxJob method.
     /// </summary>
     public partial class DataBoxJobResource : ArmResource
     {
         /// <summary> Generate the resource identifier of a <see cref="DataBoxJobResource"/> instance. </summary>
+        /// <param name="subscriptionId"> The subscriptionId. </param>
+        /// <param name="resourceGroupName"> The resourceGroupName. </param>
+        /// <param name="jobName"> The jobName. </param>
         public static ResourceIdentifier CreateResourceIdentifier(string subscriptionId, string resourceGroupName, string jobName)
         {
             var resourceId = $"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DataBox/jobs/{jobName}";
@@ -40,12 +44,15 @@ namespace Azure.ResourceManager.DataBox
         private readonly DataBoxManagementRestOperations _defaultRestClient;
         private readonly DataBoxJobData _data;
 
+        /// <summary> Gets the resource type for the operations. </summary>
+        public static readonly ResourceType ResourceType = "Microsoft.DataBox/jobs";
+
         /// <summary> Initializes a new instance of the <see cref="DataBoxJobResource"/> class for mocking. </summary>
         protected DataBoxJobResource()
         {
         }
 
-        /// <summary> Initializes a new instance of the <see cref = "DataBoxJobResource"/> class. </summary>
+        /// <summary> Initializes a new instance of the <see cref="DataBoxJobResource"/> class. </summary>
         /// <param name="client"> The client parameters to use in these operations. </param>
         /// <param name="data"> The resource that is the target of operations. </param>
         internal DataBoxJobResource(ArmClient client, DataBoxJobData data) : this(client, data.Id)
@@ -68,9 +75,6 @@ namespace Azure.ResourceManager.DataBox
 			ValidateResourceId(Id);
 #endif
         }
-
-        /// <summary> Gets the resource type for the operations. </summary>
-        public static readonly ResourceType ResourceType = "Microsoft.DataBox/jobs";
 
         /// <summary> Gets whether or not the current instance has data. </summary>
         public virtual bool HasData { get; }
@@ -523,11 +527,11 @@ namespace Azure.ResourceManager.DataBox
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="UnencryptedCredentials" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="UnencryptedCredentials"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<UnencryptedCredentials> GetCredentialsAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _dataBoxJobJobsRestClient.CreateListCredentialsRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, null, UnencryptedCredentials.DeserializeUnencryptedCredentials, _dataBoxJobJobsClientDiagnostics, Pipeline, "DataBoxJobResource.GetCredentials", "value", null, cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, null, UnencryptedCredentials.DeserializeUnencryptedCredentials, _dataBoxJobJobsClientDiagnostics, Pipeline, "DataBoxJobResource.GetCredentials", "value", null, cancellationToken);
         }
 
         /// <summary>
@@ -544,11 +548,11 @@ namespace Azure.ResourceManager.DataBox
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="UnencryptedCredentials" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="UnencryptedCredentials"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<UnencryptedCredentials> GetCredentials(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _dataBoxJobJobsRestClient.CreateListCredentialsRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreatePageable(FirstPageRequest, null, UnencryptedCredentials.DeserializeUnencryptedCredentials, _dataBoxJobJobsClientDiagnostics, Pipeline, "DataBoxJobResource.GetCredentials", "value", null, cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, null, UnencryptedCredentials.DeserializeUnencryptedCredentials, _dataBoxJobJobsClientDiagnostics, Pipeline, "DataBoxJobResource.GetCredentials", "value", null, cancellationToken);
         }
 
         /// <summary>

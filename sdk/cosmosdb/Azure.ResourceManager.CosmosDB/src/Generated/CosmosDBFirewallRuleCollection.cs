@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -19,9 +20,9 @@ using Azure.ResourceManager;
 namespace Azure.ResourceManager.CosmosDB
 {
     /// <summary>
-    /// A class representing a collection of <see cref="CosmosDBFirewallRuleResource" /> and their operations.
-    /// Each <see cref="CosmosDBFirewallRuleResource" /> in the collection will belong to the same instance of <see cref="MongoClusterResource" />.
-    /// To get a <see cref="CosmosDBFirewallRuleCollection" /> instance call the GetCosmosDBFirewallRules method from an instance of <see cref="MongoClusterResource" />.
+    /// A class representing a collection of <see cref="CosmosDBFirewallRuleResource"/> and their operations.
+    /// Each <see cref="CosmosDBFirewallRuleResource"/> in the collection will belong to the same instance of <see cref="MongoClusterResource"/>.
+    /// To get a <see cref="CosmosDBFirewallRuleCollection"/> instance call the GetCosmosDBFirewallRules method from an instance of <see cref="MongoClusterResource"/>.
     /// </summary>
     public partial class CosmosDBFirewallRuleCollection : ArmCollection, IEnumerable<CosmosDBFirewallRuleResource>, IAsyncEnumerable<CosmosDBFirewallRuleResource>
     {
@@ -222,12 +223,12 @@ namespace Azure.ResourceManager.CosmosDB
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="CosmosDBFirewallRuleResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="CosmosDBFirewallRuleResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<CosmosDBFirewallRuleResource> GetAllAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _cosmosDBFirewallRuleMongoClustersRestClient.CreateListFirewallRulesRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _cosmosDBFirewallRuleMongoClustersRestClient.CreateListFirewallRulesNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new CosmosDBFirewallRuleResource(Client, CosmosDBFirewallRuleData.DeserializeCosmosDBFirewallRuleData(e)), _cosmosDBFirewallRuleMongoClustersClientDiagnostics, Pipeline, "CosmosDBFirewallRuleCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new CosmosDBFirewallRuleResource(Client, CosmosDBFirewallRuleData.DeserializeCosmosDBFirewallRuleData(e)), _cosmosDBFirewallRuleMongoClustersClientDiagnostics, Pipeline, "CosmosDBFirewallRuleCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -244,12 +245,12 @@ namespace Azure.ResourceManager.CosmosDB
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="CosmosDBFirewallRuleResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="CosmosDBFirewallRuleResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<CosmosDBFirewallRuleResource> GetAll(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _cosmosDBFirewallRuleMongoClustersRestClient.CreateListFirewallRulesRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _cosmosDBFirewallRuleMongoClustersRestClient.CreateListFirewallRulesNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new CosmosDBFirewallRuleResource(Client, CosmosDBFirewallRuleData.DeserializeCosmosDBFirewallRuleData(e)), _cosmosDBFirewallRuleMongoClustersClientDiagnostics, Pipeline, "CosmosDBFirewallRuleCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new CosmosDBFirewallRuleResource(Client, CosmosDBFirewallRuleData.DeserializeCosmosDBFirewallRuleData(e)), _cosmosDBFirewallRuleMongoClustersClientDiagnostics, Pipeline, "CosmosDBFirewallRuleCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -314,6 +315,80 @@ namespace Azure.ResourceManager.CosmosDB
             {
                 var response = _cosmosDBFirewallRuleMongoClustersRestClient.GetFirewallRule(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, firewallRuleName, cancellationToken: cancellationToken);
                 return Response.FromValue(response.Value != null, response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/mongoClusters/{mongoClusterName}/firewallRules/{firewallRuleName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>MongoClusters_GetFirewallRule</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="firewallRuleName"> The name of the mongo cluster firewall rule. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="firewallRuleName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="firewallRuleName"/> is null. </exception>
+        public virtual async Task<NullableResponse<CosmosDBFirewallRuleResource>> GetIfExistsAsync(string firewallRuleName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(firewallRuleName, nameof(firewallRuleName));
+
+            using var scope = _cosmosDBFirewallRuleMongoClustersClientDiagnostics.CreateScope("CosmosDBFirewallRuleCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = await _cosmosDBFirewallRuleMongoClustersRestClient.GetFirewallRuleAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, firewallRuleName, cancellationToken: cancellationToken).ConfigureAwait(false);
+                if (response.Value == null)
+                    return new NoValueResponse<CosmosDBFirewallRuleResource>(response.GetRawResponse());
+                return Response.FromValue(new CosmosDBFirewallRuleResource(Client, response.Value), response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.DocumentDB/mongoClusters/{mongoClusterName}/firewallRules/{firewallRuleName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>MongoClusters_GetFirewallRule</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="firewallRuleName"> The name of the mongo cluster firewall rule. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="firewallRuleName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="firewallRuleName"/> is null. </exception>
+        public virtual NullableResponse<CosmosDBFirewallRuleResource> GetIfExists(string firewallRuleName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(firewallRuleName, nameof(firewallRuleName));
+
+            using var scope = _cosmosDBFirewallRuleMongoClustersClientDiagnostics.CreateScope("CosmosDBFirewallRuleCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = _cosmosDBFirewallRuleMongoClustersRestClient.GetFirewallRule(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, firewallRuleName, cancellationToken: cancellationToken);
+                if (response.Value == null)
+                    return new NoValueResponse<CosmosDBFirewallRuleResource>(response.GetRawResponse());
+                return Response.FromValue(new CosmosDBFirewallRuleResource(Client, response.Value), response.GetRawResponse());
             }
             catch (Exception e)
             {

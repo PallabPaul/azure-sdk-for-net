@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -19,9 +20,9 @@ using Azure.ResourceManager;
 namespace Azure.ResourceManager.Network
 {
     /// <summary>
-    /// A class representing a collection of <see cref="AdminRuleGroupResource" /> and their operations.
-    /// Each <see cref="AdminRuleGroupResource" /> in the collection will belong to the same instance of <see cref="SecurityAdminConfigurationResource" />.
-    /// To get an <see cref="AdminRuleGroupCollection" /> instance call the GetAdminRuleGroups method from an instance of <see cref="SecurityAdminConfigurationResource" />.
+    /// A class representing a collection of <see cref="AdminRuleGroupResource"/> and their operations.
+    /// Each <see cref="AdminRuleGroupResource"/> in the collection will belong to the same instance of <see cref="SecurityAdminConfigurationResource"/>.
+    /// To get an <see cref="AdminRuleGroupCollection"/> instance call the GetAdminRuleGroups method from an instance of <see cref="SecurityAdminConfigurationResource"/>.
     /// </summary>
     public partial class AdminRuleGroupCollection : ArmCollection, IEnumerable<AdminRuleGroupResource>, IAsyncEnumerable<AdminRuleGroupResource>
     {
@@ -224,12 +225,12 @@ namespace Azure.ResourceManager.Network
         /// <param name="top"> An optional query parameter which specifies the maximum number of records to be returned by the server. </param>
         /// <param name="skipToken"> SkipToken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skipToken parameter that specifies a starting point to use for subsequent calls. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="AdminRuleGroupResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="AdminRuleGroupResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<AdminRuleGroupResource> GetAllAsync(int? top = null, string skipToken = null, CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _adminRuleGroupAdminRuleCollectionsRestClient.CreateListRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, top, skipToken);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _adminRuleGroupAdminRuleCollectionsRestClient.CreateListNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, top, skipToken);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new AdminRuleGroupResource(Client, AdminRuleGroupData.DeserializeAdminRuleGroupData(e)), _adminRuleGroupAdminRuleCollectionsClientDiagnostics, Pipeline, "AdminRuleGroupCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new AdminRuleGroupResource(Client, AdminRuleGroupData.DeserializeAdminRuleGroupData(e)), _adminRuleGroupAdminRuleCollectionsClientDiagnostics, Pipeline, "AdminRuleGroupCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -248,12 +249,12 @@ namespace Azure.ResourceManager.Network
         /// <param name="top"> An optional query parameter which specifies the maximum number of records to be returned by the server. </param>
         /// <param name="skipToken"> SkipToken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skipToken parameter that specifies a starting point to use for subsequent calls. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="AdminRuleGroupResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="AdminRuleGroupResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<AdminRuleGroupResource> GetAll(int? top = null, string skipToken = null, CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _adminRuleGroupAdminRuleCollectionsRestClient.CreateListRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, top, skipToken);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _adminRuleGroupAdminRuleCollectionsRestClient.CreateListNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, top, skipToken);
-            return PageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new AdminRuleGroupResource(Client, AdminRuleGroupData.DeserializeAdminRuleGroupData(e)), _adminRuleGroupAdminRuleCollectionsClientDiagnostics, Pipeline, "AdminRuleGroupCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new AdminRuleGroupResource(Client, AdminRuleGroupData.DeserializeAdminRuleGroupData(e)), _adminRuleGroupAdminRuleCollectionsClientDiagnostics, Pipeline, "AdminRuleGroupCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -318,6 +319,80 @@ namespace Azure.ResourceManager.Network
             {
                 var response = _adminRuleGroupAdminRuleCollectionsRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, ruleCollectionName, cancellationToken: cancellationToken);
                 return Response.FromValue(response.Value != null, response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkManagers/{networkManagerName}/securityAdminConfigurations/{configurationName}/ruleCollections/{ruleCollectionName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>AdminRuleCollections_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="ruleCollectionName"> The name of the network manager security Configuration rule collection. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="ruleCollectionName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="ruleCollectionName"/> is null. </exception>
+        public virtual async Task<NullableResponse<AdminRuleGroupResource>> GetIfExistsAsync(string ruleCollectionName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(ruleCollectionName, nameof(ruleCollectionName));
+
+            using var scope = _adminRuleGroupAdminRuleCollectionsClientDiagnostics.CreateScope("AdminRuleGroupCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = await _adminRuleGroupAdminRuleCollectionsRestClient.GetAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, ruleCollectionName, cancellationToken: cancellationToken).ConfigureAwait(false);
+                if (response.Value == null)
+                    return new NoValueResponse<AdminRuleGroupResource>(response.GetRawResponse());
+                return Response.FromValue(new AdminRuleGroupResource(Client, response.Value), response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/networkManagers/{networkManagerName}/securityAdminConfigurations/{configurationName}/ruleCollections/{ruleCollectionName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>AdminRuleCollections_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="ruleCollectionName"> The name of the network manager security Configuration rule collection. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="ruleCollectionName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="ruleCollectionName"/> is null. </exception>
+        public virtual NullableResponse<AdminRuleGroupResource> GetIfExists(string ruleCollectionName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(ruleCollectionName, nameof(ruleCollectionName));
+
+            using var scope = _adminRuleGroupAdminRuleCollectionsClientDiagnostics.CreateScope("AdminRuleGroupCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = _adminRuleGroupAdminRuleCollectionsRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, Id.Parent.Name, Id.Name, ruleCollectionName, cancellationToken: cancellationToken);
+                if (response.Value == null)
+                    return new NoValueResponse<AdminRuleGroupResource>(response.GetRawResponse());
+                return Response.FromValue(new AdminRuleGroupResource(Client, response.Value), response.GetRawResponse());
             }
             catch (Exception e)
             {

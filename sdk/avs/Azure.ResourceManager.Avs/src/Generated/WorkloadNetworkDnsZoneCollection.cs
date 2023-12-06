@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -19,9 +20,9 @@ using Azure.ResourceManager;
 namespace Azure.ResourceManager.Avs
 {
     /// <summary>
-    /// A class representing a collection of <see cref="WorkloadNetworkDnsZoneResource" /> and their operations.
-    /// Each <see cref="WorkloadNetworkDnsZoneResource" /> in the collection will belong to the same instance of <see cref="AvsPrivateCloudResource" />.
-    /// To get a <see cref="WorkloadNetworkDnsZoneCollection" /> instance call the GetWorkloadNetworkDnsZones method from an instance of <see cref="AvsPrivateCloudResource" />.
+    /// A class representing a collection of <see cref="WorkloadNetworkDnsZoneResource"/> and their operations.
+    /// Each <see cref="WorkloadNetworkDnsZoneResource"/> in the collection will belong to the same instance of <see cref="AvsPrivateCloudResource"/>.
+    /// To get a <see cref="WorkloadNetworkDnsZoneCollection"/> instance call the GetWorkloadNetworkDnsZones method from an instance of <see cref="AvsPrivateCloudResource"/>.
     /// </summary>
     public partial class WorkloadNetworkDnsZoneCollection : ArmCollection, IEnumerable<WorkloadNetworkDnsZoneResource>, IAsyncEnumerable<WorkloadNetworkDnsZoneResource>
     {
@@ -222,12 +223,12 @@ namespace Azure.ResourceManager.Avs
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="WorkloadNetworkDnsZoneResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="WorkloadNetworkDnsZoneResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<WorkloadNetworkDnsZoneResource> GetAllAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _workloadNetworkDnsZoneWorkloadNetworksRestClient.CreateListDnsZonesRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _workloadNetworkDnsZoneWorkloadNetworksRestClient.CreateListDnsZonesNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new WorkloadNetworkDnsZoneResource(Client, WorkloadNetworkDnsZoneData.DeserializeWorkloadNetworkDnsZoneData(e)), _workloadNetworkDnsZoneWorkloadNetworksClientDiagnostics, Pipeline, "WorkloadNetworkDnsZoneCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new WorkloadNetworkDnsZoneResource(Client, WorkloadNetworkDnsZoneData.DeserializeWorkloadNetworkDnsZoneData(e)), _workloadNetworkDnsZoneWorkloadNetworksClientDiagnostics, Pipeline, "WorkloadNetworkDnsZoneCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -244,12 +245,12 @@ namespace Azure.ResourceManager.Avs
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="WorkloadNetworkDnsZoneResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="WorkloadNetworkDnsZoneResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<WorkloadNetworkDnsZoneResource> GetAll(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _workloadNetworkDnsZoneWorkloadNetworksRestClient.CreateListDnsZonesRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _workloadNetworkDnsZoneWorkloadNetworksRestClient.CreateListDnsZonesNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new WorkloadNetworkDnsZoneResource(Client, WorkloadNetworkDnsZoneData.DeserializeWorkloadNetworkDnsZoneData(e)), _workloadNetworkDnsZoneWorkloadNetworksClientDiagnostics, Pipeline, "WorkloadNetworkDnsZoneCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new WorkloadNetworkDnsZoneResource(Client, WorkloadNetworkDnsZoneData.DeserializeWorkloadNetworkDnsZoneData(e)), _workloadNetworkDnsZoneWorkloadNetworksClientDiagnostics, Pipeline, "WorkloadNetworkDnsZoneCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -314,6 +315,80 @@ namespace Azure.ResourceManager.Avs
             {
                 var response = _workloadNetworkDnsZoneWorkloadNetworksRestClient.GetDnsZone(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, dnsZoneId, cancellationToken: cancellationToken);
                 return Response.FromValue(response.Value != null, response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/workloadNetworks/default/dnsZones/{dnsZoneId}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>WorkloadNetworks_GetDnsZone</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="dnsZoneId"> NSX DNS Zone identifier. Generally the same as the DNS Zone's display name. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="dnsZoneId"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="dnsZoneId"/> is null. </exception>
+        public virtual async Task<NullableResponse<WorkloadNetworkDnsZoneResource>> GetIfExistsAsync(string dnsZoneId, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(dnsZoneId, nameof(dnsZoneId));
+
+            using var scope = _workloadNetworkDnsZoneWorkloadNetworksClientDiagnostics.CreateScope("WorkloadNetworkDnsZoneCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = await _workloadNetworkDnsZoneWorkloadNetworksRestClient.GetDnsZoneAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, dnsZoneId, cancellationToken: cancellationToken).ConfigureAwait(false);
+                if (response.Value == null)
+                    return new NoValueResponse<WorkloadNetworkDnsZoneResource>(response.GetRawResponse());
+                return Response.FromValue(new WorkloadNetworkDnsZoneResource(Client, response.Value), response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AVS/privateClouds/{privateCloudName}/workloadNetworks/default/dnsZones/{dnsZoneId}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>WorkloadNetworks_GetDnsZone</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="dnsZoneId"> NSX DNS Zone identifier. Generally the same as the DNS Zone's display name. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="dnsZoneId"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="dnsZoneId"/> is null. </exception>
+        public virtual NullableResponse<WorkloadNetworkDnsZoneResource> GetIfExists(string dnsZoneId, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(dnsZoneId, nameof(dnsZoneId));
+
+            using var scope = _workloadNetworkDnsZoneWorkloadNetworksClientDiagnostics.CreateScope("WorkloadNetworkDnsZoneCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = _workloadNetworkDnsZoneWorkloadNetworksRestClient.GetDnsZone(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, dnsZoneId, cancellationToken: cancellationToken);
+                if (response.Value == null)
+                    return new NoValueResponse<WorkloadNetworkDnsZoneResource>(response.GetRawResponse());
+                return Response.FromValue(new WorkloadNetworkDnsZoneResource(Client, response.Value), response.GetRawResponse());
             }
             catch (Exception e)
             {

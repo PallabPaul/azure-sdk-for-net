@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -20,9 +21,9 @@ using Azure.ResourceManager.Resources;
 namespace Azure.ResourceManager.SecurityCenter
 {
     /// <summary>
-    /// A class representing a collection of <see cref="IngestionSettingResource" /> and their operations.
-    /// Each <see cref="IngestionSettingResource" /> in the collection will belong to the same instance of <see cref="SubscriptionResource" />.
-    /// To get an <see cref="IngestionSettingCollection" /> instance call the GetIngestionSettings method from an instance of <see cref="SubscriptionResource" />.
+    /// A class representing a collection of <see cref="IngestionSettingResource"/> and their operations.
+    /// Each <see cref="IngestionSettingResource"/> in the collection will belong to the same instance of <see cref="SubscriptionResource"/>.
+    /// To get an <see cref="IngestionSettingCollection"/> instance call the GetIngestionSettings method from an instance of <see cref="SubscriptionResource"/>.
     /// </summary>
     public partial class IngestionSettingCollection : ArmCollection, IEnumerable<IngestionSettingResource>, IAsyncEnumerable<IngestionSettingResource>
     {
@@ -223,12 +224,12 @@ namespace Azure.ResourceManager.SecurityCenter
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="IngestionSettingResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="IngestionSettingResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<IngestionSettingResource> GetAllAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _ingestionSettingRestClient.CreateListRequest(Id.SubscriptionId);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _ingestionSettingRestClient.CreateListNextPageRequest(nextLink, Id.SubscriptionId);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new IngestionSettingResource(Client, IngestionSettingData.DeserializeIngestionSettingData(e)), _ingestionSettingClientDiagnostics, Pipeline, "IngestionSettingCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new IngestionSettingResource(Client, IngestionSettingData.DeserializeIngestionSettingData(e)), _ingestionSettingClientDiagnostics, Pipeline, "IngestionSettingCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -245,12 +246,12 @@ namespace Azure.ResourceManager.SecurityCenter
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="IngestionSettingResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="IngestionSettingResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<IngestionSettingResource> GetAll(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _ingestionSettingRestClient.CreateListRequest(Id.SubscriptionId);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _ingestionSettingRestClient.CreateListNextPageRequest(nextLink, Id.SubscriptionId);
-            return PageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new IngestionSettingResource(Client, IngestionSettingData.DeserializeIngestionSettingData(e)), _ingestionSettingClientDiagnostics, Pipeline, "IngestionSettingCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new IngestionSettingResource(Client, IngestionSettingData.DeserializeIngestionSettingData(e)), _ingestionSettingClientDiagnostics, Pipeline, "IngestionSettingCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -315,6 +316,80 @@ namespace Azure.ResourceManager.SecurityCenter
             {
                 var response = _ingestionSettingRestClient.Get(Id.SubscriptionId, ingestionSettingName, cancellationToken: cancellationToken);
                 return Response.FromValue(response.Value != null, response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/providers/Microsoft.Security/ingestionSettings/{ingestionSettingName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>IngestionSettings_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="ingestionSettingName"> Name of the ingestion setting. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="ingestionSettingName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="ingestionSettingName"/> is null. </exception>
+        public virtual async Task<NullableResponse<IngestionSettingResource>> GetIfExistsAsync(string ingestionSettingName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(ingestionSettingName, nameof(ingestionSettingName));
+
+            using var scope = _ingestionSettingClientDiagnostics.CreateScope("IngestionSettingCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = await _ingestionSettingRestClient.GetAsync(Id.SubscriptionId, ingestionSettingName, cancellationToken: cancellationToken).ConfigureAwait(false);
+                if (response.Value == null)
+                    return new NoValueResponse<IngestionSettingResource>(response.GetRawResponse());
+                return Response.FromValue(new IngestionSettingResource(Client, response.Value), response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/providers/Microsoft.Security/ingestionSettings/{ingestionSettingName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>IngestionSettings_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="ingestionSettingName"> Name of the ingestion setting. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="ingestionSettingName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="ingestionSettingName"/> is null. </exception>
+        public virtual NullableResponse<IngestionSettingResource> GetIfExists(string ingestionSettingName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(ingestionSettingName, nameof(ingestionSettingName));
+
+            using var scope = _ingestionSettingClientDiagnostics.CreateScope("IngestionSettingCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = _ingestionSettingRestClient.Get(Id.SubscriptionId, ingestionSettingName, cancellationToken: cancellationToken);
+                if (response.Value == null)
+                    return new NoValueResponse<IngestionSettingResource>(response.GetRawResponse());
+                return Response.FromValue(new IngestionSettingResource(Client, response.Value), response.GetRawResponse());
             }
             catch (Exception e)
             {

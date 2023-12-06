@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using Autorest.CSharp.Core;
 using Azure;
 using Azure.Core;
 using Azure.Core.Pipeline;
@@ -19,9 +20,9 @@ using Azure.ResourceManager;
 namespace Azure.ResourceManager.HealthcareApis
 {
     /// <summary>
-    /// A class representing a collection of <see cref="DicomServiceResource" /> and their operations.
-    /// Each <see cref="DicomServiceResource" /> in the collection will belong to the same instance of <see cref="HealthcareApisWorkspaceResource" />.
-    /// To get a <see cref="DicomServiceCollection" /> instance call the GetDicomServices method from an instance of <see cref="HealthcareApisWorkspaceResource" />.
+    /// A class representing a collection of <see cref="DicomServiceResource"/> and their operations.
+    /// Each <see cref="DicomServiceResource"/> in the collection will belong to the same instance of <see cref="HealthcareApisWorkspaceResource"/>.
+    /// To get a <see cref="DicomServiceCollection"/> instance call the GetDicomServices method from an instance of <see cref="HealthcareApisWorkspaceResource"/>.
     /// </summary>
     public partial class DicomServiceCollection : ArmCollection, IEnumerable<DicomServiceResource>, IAsyncEnumerable<DicomServiceResource>
     {
@@ -222,12 +223,12 @@ namespace Azure.ResourceManager.HealthcareApis
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> An async collection of <see cref="DicomServiceResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> An async collection of <see cref="DicomServiceResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual AsyncPageable<DicomServiceResource> GetAllAsync(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _dicomServiceRestClient.CreateListByWorkspaceRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _dicomServiceRestClient.CreateListByWorkspaceNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new DicomServiceResource(Client, DicomServiceData.DeserializeDicomServiceData(e)), _dicomServiceClientDiagnostics, Pipeline, "DicomServiceCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreateAsyncPageable(FirstPageRequest, NextPageRequest, e => new DicomServiceResource(Client, DicomServiceData.DeserializeDicomServiceData(e)), _dicomServiceClientDiagnostics, Pipeline, "DicomServiceCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -244,12 +245,12 @@ namespace Azure.ResourceManager.HealthcareApis
         /// </list>
         /// </summary>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        /// <returns> A collection of <see cref="DicomServiceResource" /> that may take multiple service requests to iterate over. </returns>
+        /// <returns> A collection of <see cref="DicomServiceResource"/> that may take multiple service requests to iterate over. </returns>
         public virtual Pageable<DicomServiceResource> GetAll(CancellationToken cancellationToken = default)
         {
             HttpMessage FirstPageRequest(int? pageSizeHint) => _dicomServiceRestClient.CreateListByWorkspaceRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
             HttpMessage NextPageRequest(int? pageSizeHint, string nextLink) => _dicomServiceRestClient.CreateListByWorkspaceNextPageRequest(nextLink, Id.SubscriptionId, Id.ResourceGroupName, Id.Name);
-            return PageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new DicomServiceResource(Client, DicomServiceData.DeserializeDicomServiceData(e)), _dicomServiceClientDiagnostics, Pipeline, "DicomServiceCollection.GetAll", "value", "nextLink", cancellationToken);
+            return GeneratorPageableHelpers.CreatePageable(FirstPageRequest, NextPageRequest, e => new DicomServiceResource(Client, DicomServiceData.DeserializeDicomServiceData(e)), _dicomServiceClientDiagnostics, Pipeline, "DicomServiceCollection.GetAll", "value", "nextLink", cancellationToken);
         }
 
         /// <summary>
@@ -314,6 +315,80 @@ namespace Azure.ResourceManager.HealthcareApis
             {
                 var response = _dicomServiceRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, dicomServiceName, cancellationToken: cancellationToken);
                 return Response.FromValue(response.Value != null, response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HealthcareApis/workspaces/{workspaceName}/dicomservices/{dicomServiceName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>DicomServices_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="dicomServiceName"> The name of DICOM Service resource. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="dicomServiceName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="dicomServiceName"/> is null. </exception>
+        public virtual async Task<NullableResponse<DicomServiceResource>> GetIfExistsAsync(string dicomServiceName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(dicomServiceName, nameof(dicomServiceName));
+
+            using var scope = _dicomServiceClientDiagnostics.CreateScope("DicomServiceCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = await _dicomServiceRestClient.GetAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, dicomServiceName, cancellationToken: cancellationToken).ConfigureAwait(false);
+                if (response.Value == null)
+                    return new NoValueResponse<DicomServiceResource>(response.GetRawResponse());
+                return Response.FromValue(new DicomServiceResource(Client, response.Value), response.GetRawResponse());
+            }
+            catch (Exception e)
+            {
+                scope.Failed(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Tries to get details for this resource from the service.
+        /// <list type="bullet">
+        /// <item>
+        /// <term>Request Path</term>
+        /// <description>/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.HealthcareApis/workspaces/{workspaceName}/dicomservices/{dicomServiceName}</description>
+        /// </item>
+        /// <item>
+        /// <term>Operation Id</term>
+        /// <description>DicomServices_Get</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <param name="dicomServiceName"> The name of DICOM Service resource. </param>
+        /// <param name="cancellationToken"> The cancellation token to use. </param>
+        /// <exception cref="ArgumentException"> <paramref name="dicomServiceName"/> is an empty string, and was expected to be non-empty. </exception>
+        /// <exception cref="ArgumentNullException"> <paramref name="dicomServiceName"/> is null. </exception>
+        public virtual NullableResponse<DicomServiceResource> GetIfExists(string dicomServiceName, CancellationToken cancellationToken = default)
+        {
+            Argument.AssertNotNullOrEmpty(dicomServiceName, nameof(dicomServiceName));
+
+            using var scope = _dicomServiceClientDiagnostics.CreateScope("DicomServiceCollection.GetIfExists");
+            scope.Start();
+            try
+            {
+                var response = _dicomServiceRestClient.Get(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, dicomServiceName, cancellationToken: cancellationToken);
+                if (response.Value == null)
+                    return new NoValueResponse<DicomServiceResource>(response.GetRawResponse());
+                return Response.FromValue(new DicomServiceResource(Client, response.Value), response.GetRawResponse());
             }
             catch (Exception e)
             {

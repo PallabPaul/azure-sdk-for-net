@@ -21,13 +21,16 @@ namespace Azure.ResourceManager.NetworkCloud
 {
     /// <summary>
     /// A Class representing a NetworkCloudStorageAppliance along with the instance operations that can be performed on it.
-    /// If you have a <see cref="ResourceIdentifier" /> you can construct a <see cref="NetworkCloudStorageApplianceResource" />
-    /// from an instance of <see cref="ArmClient" /> using the GetNetworkCloudStorageApplianceResource method.
-    /// Otherwise you can get one from its parent resource <see cref="ResourceGroupResource" /> using the GetNetworkCloudStorageAppliance method.
+    /// If you have a <see cref="ResourceIdentifier"/> you can construct a <see cref="NetworkCloudStorageApplianceResource"/>
+    /// from an instance of <see cref="ArmClient"/> using the GetNetworkCloudStorageApplianceResource method.
+    /// Otherwise you can get one from its parent resource <see cref="ResourceGroupResource"/> using the GetNetworkCloudStorageAppliance method.
     /// </summary>
     public partial class NetworkCloudStorageApplianceResource : ArmResource
     {
         /// <summary> Generate the resource identifier of a <see cref="NetworkCloudStorageApplianceResource"/> instance. </summary>
+        /// <param name="subscriptionId"> The subscriptionId. </param>
+        /// <param name="resourceGroupName"> The resourceGroupName. </param>
+        /// <param name="storageApplianceName"> The storageApplianceName. </param>
         public static ResourceIdentifier CreateResourceIdentifier(string subscriptionId, string resourceGroupName, string storageApplianceName)
         {
             var resourceId = $"/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetworkCloud/storageAppliances/{storageApplianceName}";
@@ -38,12 +41,15 @@ namespace Azure.ResourceManager.NetworkCloud
         private readonly StorageAppliancesRestOperations _networkCloudStorageApplianceStorageAppliancesRestClient;
         private readonly NetworkCloudStorageApplianceData _data;
 
+        /// <summary> Gets the resource type for the operations. </summary>
+        public static readonly ResourceType ResourceType = "Microsoft.NetworkCloud/storageAppliances";
+
         /// <summary> Initializes a new instance of the <see cref="NetworkCloudStorageApplianceResource"/> class for mocking. </summary>
         protected NetworkCloudStorageApplianceResource()
         {
         }
 
-        /// <summary> Initializes a new instance of the <see cref = "NetworkCloudStorageApplianceResource"/> class. </summary>
+        /// <summary> Initializes a new instance of the <see cref="NetworkCloudStorageApplianceResource"/> class. </summary>
         /// <param name="client"> The client parameters to use in these operations. </param>
         /// <param name="data"> The resource that is the target of operations. </param>
         internal NetworkCloudStorageApplianceResource(ArmClient client, NetworkCloudStorageApplianceData data) : this(client, data.Id)
@@ -64,9 +70,6 @@ namespace Azure.ResourceManager.NetworkCloud
 			ValidateResourceId(Id);
 #endif
         }
-
-        /// <summary> Gets the resource type for the operations. </summary>
-        public static readonly ResourceType ResourceType = "Microsoft.NetworkCloud/storageAppliances";
 
         /// <summary> Gets whether or not the current instance has data. </summary>
         public virtual bool HasData { get; }
@@ -244,16 +247,16 @@ namespace Azure.ResourceManager.NetworkCloud
         /// </summary>
         /// <param name="waitUntil"> <see cref="WaitUntil.Completed"/> if the method should wait to return until the long-running operation has completed on the service; <see cref="WaitUntil.Started"/> if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual async Task<ArmOperation> DisableRemoteVendorManagementAsync(WaitUntil waitUntil, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation<NetworkCloudOperationStatusResult>> DisableRemoteVendorManagementAsync(WaitUntil waitUntil, CancellationToken cancellationToken = default)
         {
             using var scope = _networkCloudStorageApplianceStorageAppliancesClientDiagnostics.CreateScope("NetworkCloudStorageApplianceResource.DisableRemoteVendorManagement");
             scope.Start();
             try
             {
                 var response = await _networkCloudStorageApplianceStorageAppliancesRestClient.DisableRemoteVendorManagementAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, cancellationToken).ConfigureAwait(false);
-                var operation = new NetworkCloudArmOperation(_networkCloudStorageApplianceStorageAppliancesClientDiagnostics, Pipeline, _networkCloudStorageApplianceStorageAppliancesRestClient.CreateDisableRemoteVendorManagementRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name).Request, response, OperationFinalStateVia.Location);
+                var operation = new NetworkCloudArmOperation<NetworkCloudOperationStatusResult>(new NetworkCloudOperationStatusResultOperationSource(), _networkCloudStorageApplianceStorageAppliancesClientDiagnostics, Pipeline, _networkCloudStorageApplianceStorageAppliancesRestClient.CreateDisableRemoteVendorManagementRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name).Request, response, OperationFinalStateVia.Location);
                 if (waitUntil == WaitUntil.Completed)
-                    await operation.WaitForCompletionResponseAsync(cancellationToken).ConfigureAwait(false);
+                    await operation.WaitForCompletionAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
             catch (Exception e)
@@ -278,16 +281,16 @@ namespace Azure.ResourceManager.NetworkCloud
         /// </summary>
         /// <param name="waitUntil"> <see cref="WaitUntil.Completed"/> if the method should wait to return until the long-running operation has completed on the service; <see cref="WaitUntil.Started"/> if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual ArmOperation DisableRemoteVendorManagement(WaitUntil waitUntil, CancellationToken cancellationToken = default)
+        public virtual ArmOperation<NetworkCloudOperationStatusResult> DisableRemoteVendorManagement(WaitUntil waitUntil, CancellationToken cancellationToken = default)
         {
             using var scope = _networkCloudStorageApplianceStorageAppliancesClientDiagnostics.CreateScope("NetworkCloudStorageApplianceResource.DisableRemoteVendorManagement");
             scope.Start();
             try
             {
                 var response = _networkCloudStorageApplianceStorageAppliancesRestClient.DisableRemoteVendorManagement(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, cancellationToken);
-                var operation = new NetworkCloudArmOperation(_networkCloudStorageApplianceStorageAppliancesClientDiagnostics, Pipeline, _networkCloudStorageApplianceStorageAppliancesRestClient.CreateDisableRemoteVendorManagementRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name).Request, response, OperationFinalStateVia.Location);
+                var operation = new NetworkCloudArmOperation<NetworkCloudOperationStatusResult>(new NetworkCloudOperationStatusResultOperationSource(), _networkCloudStorageApplianceStorageAppliancesClientDiagnostics, Pipeline, _networkCloudStorageApplianceStorageAppliancesRestClient.CreateDisableRemoteVendorManagementRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name).Request, response, OperationFinalStateVia.Location);
                 if (waitUntil == WaitUntil.Completed)
-                    operation.WaitForCompletionResponse(cancellationToken);
+                    operation.WaitForCompletion(cancellationToken);
                 return operation;
             }
             catch (Exception e)
@@ -313,16 +316,16 @@ namespace Azure.ResourceManager.NetworkCloud
         /// <param name="waitUntil"> <see cref="WaitUntil.Completed"/> if the method should wait to return until the long-running operation has completed on the service; <see cref="WaitUntil.Started"/> if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="content"> The request body. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual async Task<ArmOperation> EnableRemoteVendorManagementAsync(WaitUntil waitUntil, StorageApplianceEnableRemoteVendorManagementContent content = null, CancellationToken cancellationToken = default)
+        public virtual async Task<ArmOperation<NetworkCloudOperationStatusResult>> EnableRemoteVendorManagementAsync(WaitUntil waitUntil, StorageApplianceEnableRemoteVendorManagementContent content = null, CancellationToken cancellationToken = default)
         {
             using var scope = _networkCloudStorageApplianceStorageAppliancesClientDiagnostics.CreateScope("NetworkCloudStorageApplianceResource.EnableRemoteVendorManagement");
             scope.Start();
             try
             {
                 var response = await _networkCloudStorageApplianceStorageAppliancesRestClient.EnableRemoteVendorManagementAsync(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, content, cancellationToken).ConfigureAwait(false);
-                var operation = new NetworkCloudArmOperation(_networkCloudStorageApplianceStorageAppliancesClientDiagnostics, Pipeline, _networkCloudStorageApplianceStorageAppliancesRestClient.CreateEnableRemoteVendorManagementRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, content).Request, response, OperationFinalStateVia.Location);
+                var operation = new NetworkCloudArmOperation<NetworkCloudOperationStatusResult>(new NetworkCloudOperationStatusResultOperationSource(), _networkCloudStorageApplianceStorageAppliancesClientDiagnostics, Pipeline, _networkCloudStorageApplianceStorageAppliancesRestClient.CreateEnableRemoteVendorManagementRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, content).Request, response, OperationFinalStateVia.Location);
                 if (waitUntil == WaitUntil.Completed)
-                    await operation.WaitForCompletionResponseAsync(cancellationToken).ConfigureAwait(false);
+                    await operation.WaitForCompletionAsync(cancellationToken).ConfigureAwait(false);
                 return operation;
             }
             catch (Exception e)
@@ -348,16 +351,16 @@ namespace Azure.ResourceManager.NetworkCloud
         /// <param name="waitUntil"> <see cref="WaitUntil.Completed"/> if the method should wait to return until the long-running operation has completed on the service; <see cref="WaitUntil.Started"/> if it should return after starting the operation. For more information on long-running operations, please see <see href="https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/samples/LongRunningOperations.md"> Azure.Core Long-Running Operation samples</see>. </param>
         /// <param name="content"> The request body. </param>
         /// <param name="cancellationToken"> The cancellation token to use. </param>
-        public virtual ArmOperation EnableRemoteVendorManagement(WaitUntil waitUntil, StorageApplianceEnableRemoteVendorManagementContent content = null, CancellationToken cancellationToken = default)
+        public virtual ArmOperation<NetworkCloudOperationStatusResult> EnableRemoteVendorManagement(WaitUntil waitUntil, StorageApplianceEnableRemoteVendorManagementContent content = null, CancellationToken cancellationToken = default)
         {
             using var scope = _networkCloudStorageApplianceStorageAppliancesClientDiagnostics.CreateScope("NetworkCloudStorageApplianceResource.EnableRemoteVendorManagement");
             scope.Start();
             try
             {
                 var response = _networkCloudStorageApplianceStorageAppliancesRestClient.EnableRemoteVendorManagement(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, content, cancellationToken);
-                var operation = new NetworkCloudArmOperation(_networkCloudStorageApplianceStorageAppliancesClientDiagnostics, Pipeline, _networkCloudStorageApplianceStorageAppliancesRestClient.CreateEnableRemoteVendorManagementRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, content).Request, response, OperationFinalStateVia.Location);
+                var operation = new NetworkCloudArmOperation<NetworkCloudOperationStatusResult>(new NetworkCloudOperationStatusResultOperationSource(), _networkCloudStorageApplianceStorageAppliancesClientDiagnostics, Pipeline, _networkCloudStorageApplianceStorageAppliancesRestClient.CreateEnableRemoteVendorManagementRequest(Id.SubscriptionId, Id.ResourceGroupName, Id.Name, content).Request, response, OperationFinalStateVia.Location);
                 if (waitUntil == WaitUntil.Completed)
-                    operation.WaitForCompletionResponse(cancellationToken);
+                    operation.WaitForCompletion(cancellationToken);
                 return operation;
             }
             catch (Exception e)

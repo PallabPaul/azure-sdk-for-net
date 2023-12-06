@@ -15,6 +15,7 @@ using Azure.Core.TestFramework;
 using Azure.Identity.Tests.Mock;
 using Gee.External.Capstone.M68K;
 using Microsoft.Identity.Client;
+using Moq;
 using NUnit.Framework;
 
 namespace Azure.Identity.Tests
@@ -115,7 +116,7 @@ namespace Azure.Identity.Tests
             {
                 Transport = mockTransport,
                 TenantId = TenantId,
-                IsSupportLoggingEnabled = isSupportLoggingEnabled
+                IsUnsafeSupportLoggingEnabled = isSupportLoggingEnabled
             };
             var credential = GetTokenCredential(config);
             if (!CredentialTestHelpers.IsMsalCredential(credential))
@@ -190,12 +191,12 @@ namespace Azure.Identity.Tests
             Assert.AreEqual(token, actualToken.Token);
         }
 
-        [TestCaseSource(nameof(GetAllowedTenantsTestCases))]
-        public async Task VerifyAllowedTenantEnforcementCredentials(AllowedTenantsTestParameters parameters)
+        [Test]
+        public void VerifyAllowedTenantEnforcementCredentials()
         {
             // Configure the transport
             var token = Guid.NewGuid().ToString();
-            string resolvedTenantId = parameters.TokenRequestContext.TenantId ?? parameters.TenantId ?? TenantId;
+            string resolvedTenantId = TenantId;
             var idToken = CredentialTestHelpers.CreateMsalIdToken(Guid.NewGuid().ToString(), "userName", resolvedTenantId);
             bool calledDiscoveryEndpoint = false;
             bool isPubClient = false;
@@ -227,22 +228,26 @@ namespace Azure.Identity.Tests
                 return response;
             });
 
+            var mockResolver = new Mock<TenantIdResolverBase>() { CallBase = true };
             var config = new CommonCredentialTestConfig()
             {
                 Transport = mockTransport,
-                TenantId = parameters.TenantId,
-                RequestContext = parameters.TokenRequestContext,
-                AdditionallyAllowedTenants = parameters.AdditionallyAllowedTenants
+                TenantId = TenantId,
+                RequestContext = new TokenRequestContext(MockScopes.Default, tenantId: Guid.NewGuid().ToString()),
+                AdditionallyAllowedTenants = new List<string> { Guid.NewGuid().ToString() },
+                TestTentantIdResolver = mockResolver.Object
             };
             var credential = GetTokenCredential(config);
 
-            if (credential is SharedTokenCacheCredential)
-            {
-                Assert.Ignore("Tenant Enforcement tests do not apply to the SharedTokenCacheCredential.");
-            }
-
             isPubClient = CredentialTestHelpers.IsCredentialTypePubClient(credential);
-            await AssertAllowedTenantIdsEnforcedAsync(parameters, credential);
+
+            // Assert that Resolver is called and that the resolved tenant is the expected tenant
+            mockResolver.Setup(r => r.Resolve(It.IsAny<string>(), It.IsAny<TokenRequestContext>(), It.IsAny<string[]>())).Callback<string, TokenRequestContext, IList<string>>((tenantId, context, additionalTenants) =>
+            {
+                Assert.AreEqual(config.TenantId, tenantId);
+                Assert.AreEqual(config.RequestContext.TenantId, context.TenantId);
+                Assert.AreEqual(config.AdditionallyAllowedTenants, additionalTenants);
+            }).Returns(resolvedTenantId);
         }
 
         [Test]
@@ -368,6 +373,8 @@ namespace Azure.Identity.Tests
             }
         }
 
+        public static readonly char[] NegativeTestCharacters = new char[] { '|', '&', ';', '\'', '"', '!', '@', '$', '%', '^', '*', '(', ')', '=', '[', ']', '{', '}', '<', '>', '?' };
+
         public static IEnumerable<AllowedTenantsTestParameters> GetAllowedTenantsTestCases()
         {
             string tenant = Guid.NewGuid().ToString();
@@ -402,28 +409,6 @@ namespace Azure.Identity.Tests
                         yield return new AllowedTenantsTestParameters { TenantId = mainTenant, AdditionallyAllowedTenants = additoinallyAllowedTenants, TokenRequestContext = tokenRequestContext };
                     }
                 }
-            }
-        }
-
-        public static async Task AssertAllowedTenantIdsEnforcedAsync(AllowedTenantsTestParameters parameters, TokenCredential credential)
-        {
-            bool expAllowed = parameters.TenantId == null
-                || parameters.TokenRequestContext.TenantId == null
-                || parameters.TenantId == parameters.TokenRequestContext.TenantId
-                || parameters.AdditionallyAllowedTenants.Contains(parameters.TokenRequestContext.TenantId)
-                || parameters.AdditionallyAllowedTenants.Contains("*");
-
-            if (expAllowed)
-            {
-                var accessToken = await credential.GetTokenAsync(parameters.TokenRequestContext, default);
-
-                Assert.IsNotNull(accessToken.Token);
-            }
-            else
-            {
-                var ex = Assert.ThrowsAsync<AuthenticationFailedException>(async () => { await credential.GetTokenAsync(parameters.TokenRequestContext, default); });
-
-                StringAssert.Contains($"The current credential is not configured to acquire tokens for tenant {parameters.TokenRequestContext.TenantId}", ex.Message);
             }
         }
 
@@ -554,6 +539,7 @@ namespace Azure.Identity.Tests
             public TokenRequestContext RequestContext { get; set; }
             public string TenantId { get; set; }
             public IList<string> AdditionallyAllowedTenants { get; set; } = new List<string>();
+            internal TenantIdResolverBase TestTentantIdResolver { get; set; }
         }
 
         public class Claims
