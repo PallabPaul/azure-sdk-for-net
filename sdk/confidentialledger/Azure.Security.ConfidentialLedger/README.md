@@ -53,6 +53,8 @@ var ledgerClient = new ConfidentialLedgerClient(new Uri("https://my-ledger-url.c
 >
 > `ConfidentialLedgerClientOptions.VerifyConnection` defaults to `true`, which verifies node TLS certificates against the trusted identity service certificate. Set `VerifyConnection = false` only for development or testing scenarios.
 
+Hybrid ML-KEM TLS negotiation depends on the application's .NET runtime, operating system, and native TLS provider rather than this client package alone. See the [runtime qualification matrix](https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/confidentialledger/Azure.Security.ConfidentialLedger/tests/HYBRID_TLS_SUPPORT.md) before making a PQ TLS support claim.
+
 ## Key concepts
 
 ### Ledger entries
